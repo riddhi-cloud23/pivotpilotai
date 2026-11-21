@@ -1,0 +1,1 @@
+"""PivotPilot AI application."""

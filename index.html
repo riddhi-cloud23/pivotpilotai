@@ -1,0 +1,1158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f4f0">
+  <title>PivotPilot AI — Adaptive Career Pivot Coach</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f5f4f0; --surface: #fff; --ink: #1d2724; --muted: #78817b; --line: #e7e9e3;
+      --green: #245c48; --green-2: #34785f; --lime: #d7ed78; --soft-green: #edf4eb;
+      --orange: #e58b60; --soft-orange: #fff0e8; --blue: #6b83d8; --soft-blue: #eef0ff;
+      --rose: #ce6e68; --soft-rose: #fff0ed; --shadow: 0 12px 35px rgba(28,45,36,.055);
+    }
+    * { box-sizing: border-box }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; }
+    button, input, textarea, select { font: inherit }
+    button { cursor: pointer }
+    .app { display: grid; grid-template-columns: 248px minmax(0,1fr); min-height: 100vh; max-width: 1680px; margin: auto; }
+    .sidebar { background: #fcfcf9; border-right: 1px solid var(--line); padding: 26px 16px 18px; display: flex; flex-direction: column; min-height: 100vh; position: sticky; top: 0; height: 100vh; }
+    .brand { display:flex; align-items:center; gap:11px; padding: 0 10px 28px; }
+    .brand-mark { width:37px; height:37px; background:var(--green); color:#fff; border-radius:12px; display:grid; place-items:center; font-size:19px; font-weight:800; letter-spacing:-2px; }
+    .brand-name { font-size:16px; font-weight:780; letter-spacing:-.7px }
+    .brand-name span { color:var(--green-2) }
+    .workspace-label { color:#a0a69f; text-transform:uppercase; font-size:10px; font-weight:750; letter-spacing:1px; padding: 0 11px 9px; }
+    .nav { display:grid; gap:4px }
+    .nav-btn { display:flex; align-items:center; gap:12px; border:0; border-radius:10px; color:#737c76; background:transparent; padding:11px 12px; font-size:13px; text-align:left; transition:.2s; }
+    .nav-btn:hover { background:#f2f4ef; color:var(--ink) }
+    .nav-btn.active { color:var(--green); font-weight:700; background:#eaf1e9 }
+    .nav-icon { width:18px; text-align:center; font-size:16px; opacity:.9 }
+    .nav-count { margin-left:auto; background:#fff; border:1px solid var(--line); border-radius:99px; padding:2px 7px; color:#7c847e; font-size:10px }
+    .sidebar-spacer { flex:1 }
+    .sidebar-card { margin:12px 2px; padding:15px; border-radius:15px; background:#edf2e8; }
+    .sidebar-card .eyebrow { color:#637665 }
+    .sidebar-card h3 { font-size:14px; line-height:1.35; margin:8px 0 5px }
+    .sidebar-card p { color:#69766c; font-size:11px; line-height:1.55; margin:0 0 12px }
+    .user-row { border-top:1px solid var(--line); padding:16px 8px 0; display:flex; align-items:center; gap:10px }
+    .avatar { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:#f7d9c8; color:#674737; font-weight:750; font-size:12px; flex:none }
+    .user-meta { min-width:0; flex:1 }
+    .user-meta strong { display:block; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+    .user-meta span { font-size:10px; color:var(--muted) }
+    .main { min-width:0; padding:0 34px 46px; }
+    .topbar { height:76px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); gap:16px; }
+    .breadcrumb { color:#858d87; font-size:12px }
+    .top-actions { display:flex; align-items:center; gap:10px }
+    .save-status { display:flex; gap:6px; align-items:center; color:#879089; font-size:11px; }
+    .save-dot { width:7px; height:7px; background:#70a582; border-radius:50% }
+    .icon-btn { width:36px;height:36px; border:1px solid var(--line); border-radius:10px;background:#fff;color:#65716a }
+    .page { max-width:1220px; margin:0 auto }
+    .page-head { padding:30px 0 22px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px }
+    .eyebrow { color:var(--green-2); text-transform:uppercase; font-size:10px; font-weight:800; letter-spacing:1.15px }
+    h1 { margin:7px 0 6px; font-size:29px; letter-spacing:-1.15px; line-height:1.16 }
+    .subhead { color:var(--muted); line-height:1.6; margin:0; font-size:13px }
+    .btn { border:1px solid transparent; border-radius:9px; padding:10px 14px; font-size:12px; font-weight:700; transition:.18s; display:inline-flex; gap:8px; align-items:center; justify-content:center; text-decoration:none; white-space:nowrap }
+    .btn:hover { transform:translateY(-1px); filter:brightness(.98) }
+    .btn-primary { color:#fff; background:var(--green); box-shadow:0 5px 12px rgba(36,92,72,.14) }
+    .btn-secondary { background:#fff; border-color:var(--line); color:#46534a }
+    .btn-soft { background:var(--soft-green); color:var(--green); border-color:#dbe8d9 }
+    .btn-danger { background:var(--soft-rose); color:#a44d48; border-color:#f1d8d4 }
+    .btn-small { padding:7px 10px; font-size:11px }
+    .grid { display:grid; gap:16px }
+    .grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)) }
+    .grid-3 { grid-template-columns:repeat(3,minmax(0,1fr)) }
+    .grid-4 { grid-template-columns:repeat(4,minmax(0,1fr)) }
+    .card { background:var(--surface); border:1px solid var(--line); border-radius:15px; box-shadow:var(--shadow); }
+    .card-pad { padding:19px }
+    .card-title { font-size:14px; font-weight:750; letter-spacing:-.2px; margin:0 }
+    .card-note { color:var(--muted); font-size:11px; margin:6px 0 0; line-height:1.55 }
+    .section-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:24px 0 12px }
+    .section-heading h2 { font-size:15px; margin:0; letter-spacing:-.35px }
+    .section-heading p { color:var(--muted); font-size:11px; margin:4px 0 0 }
+    .hero { border-radius:19px; padding:24px 25px; background:var(--green); color:white; position:relative; overflow:hidden; min-height:204px; }
+    .hero:after { content:""; position:absolute; width:270px; height:270px; border-radius:50%; border:1px solid rgba(255,255,255,.13); right:9%; top:-92px; box-shadow:0 0 0 30px rgba(255,255,255,.035),0 0 0 65px rgba(255,255,255,.025) }
+    .hero-content { position:relative;z-index:1;max-width:640px }
+    .hero .eyebrow { color:#cfdfae }
+    .hero h1 { max-width:580px; font-size:30px; line-height:1.2; margin:12px 0 9px }
+    .hero p { color:#d5e0d9; max-width:570px; line-height:1.6; font-size:12px; margin:0 }
+    .hero-actions { display:flex; gap:9px; margin-top:17px }
+    .hero .btn-primary { background:var(--lime); color:#273520; box-shadow:none }
+    .hero .btn-secondary { background:rgba(255,255,255,.11); color:white; border-color:rgba(255,255,255,.22) }
+    .metric { padding:17px 18px; min-height:110px }
+    .metric-label { color:#7a837c; font-size:11px; font-weight:650 }
+    .metric-value { font-size:25px; font-weight:780; letter-spacing:-1px; margin:9px 0 3px }
+    .metric-foot { color:#869088; font-size:10px }
+    .metric-icon { float:right; width:29px;height:29px;border-radius:9px;display:grid;place-items:center;background:var(--soft-green);color:var(--green);font-size:14px }
+    .progress { height:7px; border-radius:8px; background:#eff1ec; overflow:hidden }
+    .progress > i { height:100%; display:block; background:var(--green-2); border-radius:inherit; transition:width .4s }
+    .progress-label { display:flex;justify-content:space-between;gap:8px;color:#7c857e;font-size:10px;margin-bottom:8px }
+    .list-row { display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid #f0f1ed }
+    .list-row:last-child { border-bottom:0;padding-bottom:0 }
+    .list-row:first-child { padding-top:0 }
+    .row-icon { width:34px;height:34px;border-radius:10px;background:#f3f5ef;display:grid;place-items:center;color:#56735f;flex:none }
+    .row-main { min-width:0;flex:1 }
+    .row-main strong { font-size:12px;display:block }
+    .row-main span { display:block;font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4 }
+    .tag { display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:5px 8px;font-size:10px;font-weight:700;white-space:nowrap }
+    .tag-match { color:#327354;background:#eaf5ed }
+    .tag-partial { color:#aa7135;background:#fff4e3 }
+    .tag-missing { color:#b35650;background:#fff0ed }
+    .tag-neutral { color:#69766e;background:#f0f2ed }
+    .tag-blue { color:#596fbd;background:#edf0ff }
+    .divider { height:1px;background:var(--line);margin:15px 0 }
+    .callout { padding:13px 14px;border:1px solid #e1e9d8;background:#f6f9f2;border-radius:11px;display:flex;gap:10px;align-items:flex-start }
+    .callout p { margin:0;color:#58665c;font-size:11px;line-height:1.55 }
+    .callout strong { color:#314d3c }
+    .toolbar { display:flex;gap:8px;align-items:center;flex-wrap:wrap }
+    .select,.field,.textarea { border:1px solid #dfe4dc;background:#fff;border-radius:9px;padding:10px 11px;color:var(--ink);outline:none;width:100%;font-size:12px;transition:border .16s,box-shadow .16s }
+    .select:focus,.field:focus,.textarea:focus { border-color:#84a891;box-shadow:0 0 0 3px rgba(52,120,95,.1) }
+    .textarea { min-height:130px;resize:vertical;line-height:1.6 }
+    .field-label { display:block;font-size:11px;font-weight:700;color:#56625a;margin:0 0 6px }
+    .field-help { color:#949c96;font-size:10px;margin-top:5px;line-height:1.45 }
+    .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px }
+    .form-field.full { grid-column:1/-1 }
+    .filter-chip { border:1px solid var(--line);border-radius:99px;background:#fff;color:#7a847c;padding:7px 11px;font-size:10px;font-weight:700 }
+    .filter-chip.active { color:var(--green);border-color:#bdd4c0;background:#eef5ed }
+    .skill-card { padding:15px;transition:transform .18s,border .18s;cursor:pointer }
+    .skill-card:hover { transform:translateY(-2px);border-color:#cad8c9 }
+    .skill-card-top { display:flex;justify-content:space-between;align-items:flex-start;gap:8px }
+    .skill-card h3 { font-size:13px;margin:0 0 7px }
+    .skill-card p { color:var(--muted);font-size:10px;line-height:1.55;margin:10px 0 0 }
+    .skill-mini { height:5px;background:#f0f1ed;border-radius:5px;margin-top:12px;overflow:hidden }
+    .skill-mini i { height:100%;display:block;border-radius:5px;background:var(--green-2) }
+    .week { overflow:hidden }
+    .week-head { padding:16px 18px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #eff0ec }
+    .week-number { width:35px;height:35px;border-radius:11px;background:#edf3e9;color:#37664b;display:grid;place-items:center;font-size:11px;font-weight:800 }
+    .week-meta { min-width:0;flex:1 }
+    .week-meta h3 { font-size:13px;margin:0 }
+    .week-meta p { color:var(--muted);font-size:10px;margin:4px 0 0 }
+    .task-list { padding:3px 18px 13px }
+    .task-item { display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f2f3ef }
+    .task-item:last-child { border-bottom:0 }
+    .task-check { appearance:none;width:16px;height:16px;border:1.5px solid #c9d1c9;border-radius:5px;margin:1px 0 0;flex:none;cursor:pointer;position:relative }
+    .task-check:checked { background:var(--green-2);border-color:var(--green-2) }
+    .task-check:checked:after { content:"✓";position:absolute;color:#fff;font-size:11px;left:2px;top:-1px }
+    .task-copy { flex:1;min-width:0 }
+    .task-copy strong { font-size:11px }
+    .task-copy p { margin:4px 0 0;color:#848c86;font-size:10px;line-height:1.5 }
+    .task-item.done .task-copy strong { color:#96a099;text-decoration:line-through }
+    .project-card { padding:18px }
+    .project-head { display:flex;justify-content:space-between;gap:8px;align-items:flex-start }
+    .project-card h3 { font-size:14px;line-height:1.35;margin:0 }
+    .project-card>p { color:#78827b;font-size:10px;line-height:1.6;margin:9px 0 13px }
+    .project-meta { color:#849088;font-size:10px;display:flex;gap:12px;margin:11px 0 }
+    .checkline { display:flex;gap:8px;align-items:center;color:#66736a;font-size:10px;padding:6px 0 }
+    .checkline input { accent-color:var(--green-2) }
+    .rubric { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px }
+    .rubric-item { padding:12px;background:#f8f9f6;border:1px solid #eceee8;border-radius:10px }
+    .rubric-item span { font-size:9px;color:#818b83;display:block;min-height:26px;line-height:1.4 }
+    .rubric-item strong { font-size:17px;display:block;margin-top:5px }
+    .question-card { padding:18px;background:#f5f7f1;border-radius:13px;border:1px solid #e9eee4 }
+    .question-card p { font-size:14px;font-weight:700;line-height:1.55;margin:8px 0 0 }
+    .answer-box { min-height:160px }
+    .interview-result { display:none }
+    .interview-result.visible { display:block;animation:rise .25s ease }
+    .score-ring { width:70px;height:70px;border-radius:50%;border:5px solid #dbe8da;display:grid;place-items:center;color:var(--green);font-size:18px;font-weight:800;position:relative }
+    .score-ring:after { content:"/100";font-size:8px;color:#8b968d;position:absolute;bottom:10px;font-weight:600 }
+    .application-table { width:100%;border-collapse:collapse;min-width:720px }
+    .application-table th { text-align:left;color:#89918a;font-size:9px;text-transform:uppercase;letter-spacing:.7px;padding:11px 10px;border-bottom:1px solid var(--line) }
+    .application-table td { padding:12px 10px;border-bottom:1px solid #eff0ec;font-size:11px;vertical-align:middle }
+    .application-table tr:last-child td { border-bottom:0 }
+    .company-cell strong { display:block;font-size:11px }
+    .company-cell span { color:#909891;font-size:9px;display:block;margin-top:3px }
+    .status-select { border:0;border-radius:99px;padding:6px 8px;font-size:9px;font-weight:750;background:#f0f2ed;color:#65736a;outline:none }
+    .status-select[data-value="Interview"] { background:#edf0ff;color:#6175c3 }
+    .status-select[data-value="Offer"] { background:#e8f4eb;color:#377b52 }
+    .status-select[data-value="Rejected"] { background:#fff0ed;color:#b05e55 }
+    .status-select[data-value="No response"] { background:#fff4e3;color:#a67839 }
+    .chart-row { display:grid;grid-template-columns:88px 1fr 48px;align-items:center;gap:9px;margin:13px 0 }
+    .chart-label { font-size:10px;color:#68746b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+    .chart-track { height:9px;background:#f0f2ed;border-radius:8px;overflow:hidden }
+    .chart-track i { height:100%;display:block;background:var(--green-2);border-radius:8px;transition:width .35s }
+    .chart-value { text-align:right;font-size:10px;font-weight:700;color:#56665b }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(24,34,29,.35);z-index:20;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px) }
+    .modal-backdrop.open { display:flex;animation:fade .16s ease }
+    .modal { width:min(600px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:17px;box-shadow:0 25px 80px rgba(20,35,27,.2);padding:22px }
+    .modal-head { display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:18px }
+    .modal-head h2 { font-size:18px;margin:0;letter-spacing:-.4px }
+    .close-btn { border:0;background:#f2f4ef;border-radius:8px;width:30px;height:30px;color:#637067;font-size:18px }
+    .toast { position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);padding:11px 15px;border-radius:10px;background:#263a2e;color:white;font-size:12px;box-shadow:0 8px 25px rgba(20,40,28,.2);opacity:0;pointer-events:none;transition:.24s;z-index:40 }
+    .toast.show { opacity:1;transform:translate(-50%,0) }
+    .empty { color:#849087;padding:22px;text-align:center;font-size:11px }
+    .mobile-brand { display:none }
+    .dark-mode { --paper:#151b18;--surface:#202824;--ink:#eff3ef;--muted:#a3afa6;--line:#343f38;--green:#99c5a5;--green-2:#82b390;--soft-green:#2b3d31;--soft-orange:#44342a;--soft-blue:#303653;--soft-rose:#462f2c;--shadow:0 12px 35px rgba(0,0,0,.12) }
+    .dark-mode .sidebar,.dark-mode .topbar { background:#1b221e }
+    .dark-mode .nav-btn:hover,.dark-mode .nav-btn.active { background:#2b3d31 }
+    .dark-mode .sidebar-card { background:#2b3d31 }
+    .dark-mode .card,.dark-mode .btn-secondary,.dark-mode .field,.dark-mode .textarea,.dark-mode .select,.dark-mode .filter-chip { background:#202824;color:var(--ink);border-color:#3a453e }
+    .dark-mode .hero { background:#244937 }
+    .dark-mode .week-head,.dark-mode .task-item,.dark-mode .application-table td,.dark-mode .application-table th { border-color:#343f38 }
+    .dark-mode .question-card,.dark-mode .rubric-item,.dark-mode .callout { background:#28342c;border-color:#3b4c3e }
+    .dark-mode .progress,.dark-mode .chart-track,.dark-mode .skill-mini { background:#353f38 }
+    .dark-mode .week-number,.dark-mode .row-icon { background:#314436;color:#a7d2af }
+    .dark-mode .modal { background:#202824 }
+    .dark-mode .modal .field,.dark-mode .modal .textarea,.dark-mode .modal .select { background:#19201b }
+    .account-shell { padding:25px 0 42px }
+    .account-card { display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);overflow:hidden;min-height:570px;border-radius:22px;background:#fff;border:1px solid var(--line);box-shadow:0 24px 70px rgba(28,45,36,.1) }
+    .account-story { background:#204a38;color:#fff;padding:35px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between }
+    .account-story:before,.account-story:after { content:"";position:absolute;border:1px solid rgba(255,255,255,.13);width:350px;height:350px;border-radius:50%;right:-140px;top:80px }
+    .account-story:after { width:240px;height:240px;right:-84px;top:135px;box-shadow:0 0 0 29px rgba(255,255,255,.035),0 0 0 60px rgba(255,255,255,.025) }
+    .account-story>* { position:relative;z-index:1 }
+    .account-story .brand-name { font-size:17px }
+    .account-story .eyebrow { color:#d5e59d }
+    .account-story h2 { font-size:34px;line-height:1.13;letter-spacing:-1.3px;max-width:440px;margin:17px 0 12px }
+    .account-story p { color:#d1ded5;max-width:400px;font-size:12px;line-height:1.7 }
+    .account-points { display:grid;gap:12px;margin-top:27px }
+    .account-point { display:flex;align-items:center;gap:10px;font-size:11px;color:#e4ece6 }
+    .account-check { width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.12);color:#d7ed78 }
+    .account-quote { border-top:1px solid rgba(255,255,255,.17);padding-top:17px;color:#d4e0d7;font-size:11px;line-height:1.6 }
+    .account-quote strong { color:#fff }
+    .account-form-side { padding:32px clamp(22px,5vw,55px);display:flex;flex-direction:column;justify-content:center }
+    .auth-tabs { display:flex;gap:6px;border-bottom:1px solid var(--line);margin:18px 0 20px }
+    #account-nav-label { max-width:135px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block }
+    .auth-tab { padding:9px 11px;background:transparent;border:0;border-bottom:2px solid transparent;color:#7a857c;font-size:11px;font-weight:700 }
+    .auth-tab.active { border-bottom-color:var(--green-2);color:var(--green) }
+    .auth-form { display:grid;gap:13px }
+    .auth-form .btn { width:100%;padding:12px }
+    .auth-message { padding:10px 12px;border-radius:9px;background:#f1f5ed;color:#43634a;font-size:11px;line-height:1.5;margin:0 0 12px }
+    .auth-message.error { background:#fff0ed;color:#a8504b }
+    .auth-divider { display:flex;align-items:center;gap:10px;color:#a1a8a2;font-size:10px;margin:16px 0 }
+    .auth-divider:before,.auth-divider:after { content:"";height:1px;background:var(--line);flex:1 }
+    .config-panel { margin-top:17px;border:1px solid var(--line);border-radius:11px;padding:12px }
+    .config-panel summary { cursor:pointer;font-size:10px;font-weight:750;color:#647068 }
+    .config-panel[open] summary { margin-bottom:12px }
+    .config-panel .field { font-size:11px }
+    .security-note { display:flex;gap:8px;color:#89928b;font-size:9px;line-height:1.5;margin-top:12px }
+    .account-status { display:flex;align-items:center;gap:8px;padding:11px 12px;background:#f1f5ed;border-radius:10px;color:#43634a;font-size:11px;margin:0 0 14px }
+    .account-status .save-dot { flex:none }
+    .setup-steps { display:grid;gap:9px;margin:15px 0 }
+    .setup-step { display:grid;grid-template-columns:24px 1fr;gap:9px;font-size:10px;color:#738077;line-height:1.5 }
+    .step-index { width:21px;height:21px;border-radius:7px;background:#edf3e9;color:#41644a;display:grid;place-items:center;font-weight:800;font-size:9px }
+    .dark-mode .account-card { background:#202824 }
+    .dark-mode .account-story { background:#244937 }
+    .dark-mode .account-form-side .auth-message,.dark-mode .account-status { background:#2b3d31;color:#c7dec7 }
+    .dark-mode .auth-tabs { border-color:var(--line) }
+    .dark-mode .config-panel { border-color:var(--line) }
+    .dark-mode .config-panel summary { color:#bac5bc }
+    .insight-number { font-size:26px;font-weight:800;letter-spacing:-.8px }
+    .score-track { height:8px;background:#eef0eb;border-radius:8px;overflow:hidden }
+    .score-track i { display:block;height:100%;background:var(--green-2);border-radius:8px;transition:width .5s }
+    .question-option { display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:.18s }
+    .question-option:hover { border-color:#a9c5ad;background:#f7faf4 }
+    .question-option input { accent-color:var(--green-2);margin-top:2px }
+    .module-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px }
+    .report-card { padding:18px;border-radius:15px;background:linear-gradient(135deg,#edf4eb,#f8f6ef);border:1px solid #e4eadd }
+    .dark-mode .report-card { background:#28342c;border-color:#3b4c3e }
+    .result-chart { position:relative;min-height:240px }
+    .warning-callout { padding:15px;border-radius:12px;border:1px solid #f0c99e;background:#fff5e8;color:#6b542d }
+    .warning-callout strong { color:#9b652e }
+    .task-board { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px }
+    .task-column { background:#f7f8f4;border-radius:11px;padding:12px }
+    .task-column h3 { margin:0 0 8px;font-size:11px }
+    .agent-action { display:flex;align-items:flex-start;gap:9px;padding:10px 0;border-bottom:1px solid #eff0ec }
+    .agent-action:last-child { border-bottom:0 }
+    .role-card { border:1px solid var(--line);border-radius:11px;padding:13px }
+    .milestone-row { display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0 }
+    .milestone-row .checkline { flex:1;margin:0 }
+    @media print { .sidebar,.topbar,.page-head button,.btn,.nav,.field-help { display:none!important } .app{display:block}.main{padding:0}.page{max-width:none}.card{box-shadow:none;break-inside:avoid} }
+    .dark-mode .question-option:hover,.dark-mode .task-column { background:#29342d }
+    @keyframes fade { from{opacity:0}to{opacity:1} }
+    @keyframes rise { from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)} }
+    @media(max-width:1000px) {
+      .app { grid-template-columns:210px minmax(0,1fr) }.main{padding:0 22px 35px}
+      .grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media(max-width:720px) {
+      .app{display:block}.sidebar{position:fixed;z-index:15;top:auto;bottom:0;left:0;right:0;height:auto;min-height:0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--line);display:block;background:#fcfcf9}
+      .brand,.workspace-label,.sidebar-card,.sidebar-spacer,.user-row{display:none}.nav{display:flex;justify-content:flex-start;gap:2px;overflow-x:auto;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
+      .nav-btn{flex:0 0 67px;min-width:0;padding:8px 3px;display:flex;flex-direction:column;gap:4px;justify-content:center;text-align:center;font-size:9px;border-radius:9px}
+      .nav-icon{font-size:16px}.nav-count{display:none}.main{padding:0 15px 94px}.topbar{height:61px}.mobile-brand{display:block;font-weight:800;font-size:14px;letter-spacing:-.5px}.breadcrumb{display:none}.save-status{font-size:0}.save-dot{width:8px;height:8px}
+      .page-head{padding:23px 0 17px;align-items:flex-start;flex-direction:column}.page-head .btn{align-self:stretch}
+      h1{font-size:25px}.hero{padding:20px;min-height:0}.hero h1{font-size:25px}.hero:after{right:-60px;opacity:.5}
+      .grid-2,.grid-3{grid-template-columns:1fr}.grid-4{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+      .metric{padding:14px;min-height:100px}.metric-value{font-size:21px}.form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}
+      .rubric{grid-template-columns:repeat(2,minmax(0,1fr))}.section-heading{margin-top:20px}.card-pad{padding:16px}
+      .application-table th,.application-table td{padding-left:7px;padding-right:7px}
+      .account-shell{padding:20px 0}.account-card{grid-template-columns:1fr;min-height:0}.account-story{padding:23px;min-height:270px}.account-story h2{font-size:27px}.account-quote{margin-top:24px}.account-form-side{padding:25px 20px}
+    }
+    @media(prefers-reduced-motion:reduce) { *,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">P</div><div class="brand-name">PivotPilot <span>AI</span></div></div>
+      <div class="workspace-label">Your transition</div>
+      <nav class="nav" aria-label="Main navigation">
+        <button class="nav-btn active" data-page="overview"><span class="nav-icon">⌂</span>Overview</button>
+        <button class="nav-btn" data-page="profile"><span class="nav-icon">▤</span>My profile</button>
+        <button class="nav-btn" data-page="diagnostic"><span class="nav-icon">◉</span>Diagnostic</button>
+        <button class="nav-btn" data-page="skills"><span class="nav-icon">◈</span>Skill map</button>
+        <button class="nav-btn" data-page="scanner"><span class="nav-icon">⌕</span>Vibe scanner</button>
+        <button class="nav-btn" data-page="market"><span class="nav-icon">↗</span>Market value</button>
+        <button class="nav-btn" data-page="roadmap"><span class="nav-icon">▤</span>Learning plan</button>
+        <button class="nav-btn" data-page="projects"><span class="nav-icon">◇</span>Portfolio lab</button>
+        <button class="nav-btn" data-page="challenges"><span class="nav-icon">✓</span>Skill challenge</button>
+        <button class="nav-btn" data-page="resume"><span class="nav-icon">▧</span>Living resume</button>
+        <button class="nav-btn" data-page="interview"><span class="nav-icon">◎</span>Mock interview</button>
+        <button class="nav-btn" data-page="applications"><span class="nav-icon">▣</span>Applications <span id="app-count" class="nav-count">0</span></button>
+        <button class="nav-btn" data-page="agent"><span class="nav-icon">✦</span>Career agent</button>
+        <button class="nav-btn" data-page="account"><span class="nav-icon">↗</span><span id="account-nav-label">Sign in & sync</span></button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-card">
+        <div class="eyebrow">Small steps count</div>
+        <h3>Your next chapter is built one proof point at a time.</h3>
+        <p>Make progress visible. Adapt the plan whenever your priorities change.</p>
+        <button class="btn btn-soft btn-small" data-nav="roadmap">View this week's plan →</button>
+      </div>
+      <div class="user-row"><div class="avatar" id="avatar">AM</div><div class="user-meta"><strong id="user-name">Alex Morgan</strong><span id="user-status">Saved on this device</span></div><button class="icon-btn" data-page="account" title="Account and sign in" aria-label="Account and sign in">↗</button><button class="icon-btn" data-action="theme" title="Toggle theme" aria-label="Toggle theme">☼</button></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><div class="mobile-brand">PivotPilot AI</div><div class="breadcrumb" id="breadcrumb">Your transition / Overview</div></div><div class="top-actions"><span class="tag tag-neutral" id="api-status">Checking API…</span><span class="save-status" id="save-status"><i class="save-dot"></i> Saved on this device</span><button class="btn btn-soft btn-small" data-nav="account" id="top-account-button">Sign in & sync →</button><button class="icon-btn" data-action="theme" title="Toggle light or dark mode" aria-label="Toggle theme">◐</button></div></header>
+      <div id="view" class="page" aria-live="polite"></div>
+    </main>
+  </div>
+  <div id="modal-root"></div>
+  <div id="toast" class="toast" role="status"></div>
+
+  <script>
+    const STORE_KEY = 'pivotpath-ai-workspace-v1';
+    const SUPABASE_CONFIG_KEY = 'pivotpath-supabase-config-v1';
+    const SKILLS = [
+      {name:'SQL',aliases:['sql','postgres','mysql','bigquery'],why:'A core requirement for querying, validating, and explaining business data.'},
+      {name:'Python',aliases:['python','pandas','numpy'],why:'Used to clean larger datasets and automate repeatable analyses.'},
+      {name:'Data visualization',aliases:['tableau','power bi','looker','data visualization','visualization'],why:'Turns analysis into clear dashboards and decision-ready stories.'},
+      {name:'Statistics',aliases:['statistics','statistical','probability','hypothesis testing'],why:'Supports sound conclusions, experiments, and uncertainty estimates.'},
+      {name:'Experimentation',aliases:['experimentation','a/b test','ab testing','experiment design'],why:'Helps measure whether product and growth changes actually work.'},
+      {name:'Stakeholder communication',aliases:['stakeholder','executive communication','cross-functional','present findings'],why:'Connects analytical work to decisions across product and business teams.'},
+      {name:'dbt',aliases:['dbt','data modeling','data models'],why:'Builds tested, documented transformations that teams can trust.'},
+      {name:'Cloud data warehouse',aliases:['snowflake','redshift','databricks','cloud warehouse','data warehouse'],why:'Shows familiarity with modern analytics infrastructure at scale.'},
+      {name:'Product analytics',aliases:['product analytics','funnels','retention','cohort analysis'],why:'Links user behavior to adoption, engagement, and retention outcomes.'},
+      {name:'Git',aliases:['git','github','version control'],why:'Enables collaborative, reviewable, reproducible analytical work.'}
+    ];
+    const SAMPLE_RESUME = `Alex Morgan — Customer Operations Specialist
+Customer-focused operations professional with 4 years of experience improving service workflows and reporting.
+Skills: Excel, Google Sheets, Salesforce, customer research, process improvement, presentation, SQL (basic).
+Experience: Built weekly performance reports for a 12-person support team; identified repeat-contact patterns and helped reduce escalations by 18%. Partnered with product and engineering to document customer issues and prioritize fixes. Trained 8 teammates on updated workflows.
+Education: BA, Communications. Completed an introductory SQL course.`;
+    const SAMPLE_JD = `Product Data Analyst — Northstar
+We are looking for a curious analyst to help product teams make evidence-based decisions. You will write SQL to explore product data, use Python for data cleaning, and build dashboards in Tableau. Design and analyze experiments, explain statistical findings, and partner with product, engineering, and marketing stakeholders. Experience with dbt and a cloud data warehouse such as Snowflake is a plus. Present clear recommendations and use cohort analysis to understand retention.`;
+    const sampleWeeks = [
+      {title:'Get fluent in the data',focus:'SQL foundations · 4 hours',tasks:[
+        ['Write real product queries','Practice SELECT, joins, CTEs, and window functions on a public product-events dataset.'],
+        ['Create a query notebook','Answer three questions about activation and save commented SQL in a GitHub repo.'],
+        ['Explain one finding','Write a short, plain-language takeaway from your query and name one limitation.']]},
+      {title:'Analyze and visualize',focus:'Python + dashboards · 5 hours',tasks:[
+        ['Clean a messy dataset','Use pandas to check missing values, duplicates, and event-date consistency.'],
+        ['Build a decision-ready dashboard','Create a Tableau or Looker Studio view for activation and retention.'],
+        ['Practice statistical reasoning','Explain sample size, uncertainty, and a confidence interval in your own words.']]},
+      {title:'Prove product thinking',focus:'Experiments + storytelling · 4 hours',tasks:[
+        ['Draft an experiment brief','State a hypothesis, primary metric, guardrails, and possible confounders.'],
+        ['Model a cohort question','Compare week-one retention for two signup cohorts and describe the caveats.'],
+        ['Present a recommendation','Record a 3-minute walkthrough connecting analysis to a product decision.']]},
+      {title:'Ship an analytics portfolio',focus:'dbt + interview practice · 5 hours',tasks:[
+        ['Add tested transformations','Model clean staging and mart tables, with a few data-quality checks.'],
+        ['Publish your project story','Add a README, architecture sketch, key trade-offs, and a concise result.'],
+        ['Rehearse your transition story','Practice a structured answer using your project and measurable impact.']]}
+    ];
+    const sampleState = {
+      version:1,theme:'light',name:'Alex Morgan',target:'Product Data Analyst',resume:SAMPLE_RESUME,jd:SAMPLE_JD,
+      apps:[
+        {id:'a1',company:'Northstar',role:'Product Data Analyst',type:'Product analytics',seniority:'Mid-level',status:'Interview',approach:'Tailored',notes:'Strong SQL match; recruiter screen booked.'},
+        {id:'a2',company:'Mosaic Health',role:'Business Intelligence Analyst',type:'BI / reporting',seniority:'Mid-level',status:'No response',approach:'Tailored',notes:'Follow up next week.'},
+        {id:'a3',company:'Parcel Labs',role:'Product Analyst',type:'Product analytics',seniority:'Associate',status:'Rejected',approach:'Quick apply',notes:'Need a stronger experiment example.'},
+        {id:'a4',company:'Fieldnote',role:'Customer Insights Analyst',type:'Customer insights',seniority:'Associate',status:'Offer',approach:'Referral',notes:'Offer received — compare scope.'}
+      ],
+      completed:{},milestones:{},interviews:[],paceNote:'',adapted:false,
+      location:'United States',startDate:'',targetDate:'',studyHours:1,quizHistory:[],quizQuestion:null,quizDone:false,quizScores:{},skillAnalysis:null,marketValue:null,scanResult:null,learningTasks:[],plannerResult:null,challenge:null,challengeResults:[],livingResume:[],livingResumeText:'',pendingBullets:[],generatedProjects:[],milestoneVerifications:{},careerReport:null,applicationAnalysis:null,agentApprovals:[],interviewQuestion:null,unlockedRoles:[]
+    };
+    function loadState(){
+      try {
+        const parsed=JSON.parse(localStorage.getItem(STORE_KEY)||'null');
+        if(parsed&&parsed.version===1)return {...structuredClone(sampleState),...parsed,apps:Array.isArray(parsed.apps)?parsed.apps:structuredClone(sampleState.apps),completed:parsed.completed||{},milestones:parsed.milestones||{}};
+      } catch(error){ console.warn('PivotPilot could not read saved workspace; starting with the sample profile.',error); }
+      return structuredClone(sampleState);
+    }
+    let state=loadState(),anonymousWorkspace=structuredClone(state),currentPage='overview',skillFilter='all',interviewIndex=0,recognition=null,toastTimer,saveTimer,cloudSaveTimer;
+    let supabaseConfig=loadSupabaseConfig(),supabaseClient=null,supabaseSdkPromise=null,authSubscription=null,currentUser=null,lastCloudUserId=null,cloudLoadingUserId=null,cloudLoadPromise=null,authMode='signin',syncState='local',authNotice='',authNoticeType='info',passwordRecovery=false;
+    function loadSupabaseConfig(){try{return JSON.parse(localStorage.getItem(SUPABASE_CONFIG_KEY)||'null');}catch(error){console.warn('Supabase browser configuration could not be read.',error);return null;}}
+    function userStoreKey(userId){return `pivotpath-ai-user-workspace-${userId}`;}
+    function save(){try{localStorage.setItem(currentUser?userStoreKey(currentUser.id):STORE_KEY,JSON.stringify(state));if(!currentUser)anonymousWorkspace=structuredClone(state);scheduleCloudSave();}catch(error){console.error('PivotPilot could not save workspace.',error);toast('Could not save changes in this browser. Check storage availability.');}}
+    function setSyncStatus(label,status='local'){
+      syncState=status;
+      const el=document.getElementById('save-status');
+      if(el){el.lastChild.textContent=` ${label}`;const dot=el.querySelector('.save-dot');if(dot)dot.style.background=status==='error'?'#ce6e68':status==='saving'?'#e1a34a':status==='cloud'?'#70a582':'#99a19b';}
+      const userStatus=document.getElementById('user-status');if(userStatus)userStatus.textContent=status==='cloud'?'Cloud sync on':status==='saving'?'Syncing changes…':status==='error'?'Sync needs attention':'Saved on this device';
+    }
+    const API_BASE=(window.PIVOTPILOT_API_URL||(window.location.protocol==='file:'?'http://localhost:8000':window.location.origin)).replace(/\/+$/,'');
+    let apiStatus='unknown',chartInstances={};
+    async function apiRequest(path,options={}){
+      const headers=new Headers(options.headers||{});
+      if(!(options.body instanceof FormData))headers.set('Content-Type','application/json');
+      if(currentUser&&supabaseClient){const {data,error}=await supabaseClient.auth.getSession();if(error)throw new Error(`Could not read your sign-in session: ${error.message}`);if(data.session?.access_token)headers.set('Authorization',`Bearer ${data.session.access_token}`);}
+      const response=await fetch(`${API_BASE}${path}`,{...options,headers});
+      const contentType=response.headers.get('content-type')||'';
+      const result=contentType.includes('application/json')?await response.json():await response.text();
+      if(!response.ok)throw new Error(typeof result==='object'?(result.detail||result.message||`Request failed (${response.status})`):`Request failed (${response.status})`);
+      setApiStatus(true);return result;
+    }
+    function setApiStatus(online){apiStatus=online?'online':'offline';const badge=document.getElementById('api-status');if(badge){badge.textContent=online?'API connected':'Demo mode';badge.className=`tag ${online?'tag-match':'tag-neutral'}`;}}
+    async function checkApi(){
+      try{return await apiRequest('/api/v1/health');}
+      catch(error){setApiStatus(false);return null;}
+    }
+    async function apiOrDemo(path,body,fallback){
+      try{return {data:await apiRequest(path,{method:'POST',body:body instanceof FormData?body:JSON.stringify(body)}),source:'api'};}
+      catch(error){if(error instanceof TypeError)setApiStatus(false);console.info(`PivotPilot API fallback for ${path}:`,error.message);return {data:await fallback(error),source:'demo'};}
+    }
+    function scheduleCloudSave(){
+      if(!currentUser||!supabaseClient)return;
+      const userId=currentUser.id,workspace=structuredClone(state);
+      clearTimeout(cloudSaveTimer);setSyncStatus('Syncing changes…','saving');
+      cloudSaveTimer=setTimeout(async()=>{
+        try{
+          if(currentUser?.id!==userId)return;
+          const {error}=await supabaseClient.from('user_workspaces').upsert({user_id:userId,workspace,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+          if(error)throw error;
+          setSyncStatus('Synced to your account','cloud');
+        }catch(error){console.error('Supabase workspace sync failed.',error);setSyncStatus('Cloud sync needs attention','error');toast('Saved locally, but cloud sync failed. Check your Supabase table and connection.');}
+      },700);
+    }
+    function escapeHtml(value=''){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
+    function percent(a,b){return b?Math.round(a/b*100):0}
+    function tokenizeText(text){return String(text||'').toLowerCase()}
+    function extractFound(text){const hay=tokenizeText(text);return SKILLS.filter(skill=>skill.aliases.some(alias=>new RegExp(`(^|[^a-z0-9+#])${alias.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}([^a-z0-9+#]|$)`,'i').test(hay))).map(s=>s.name)}
+    function getSkillMap(){
+      const resume=extractFound(state.resume),jd=extractFound(state.jd);
+      const evidenceByName=new Map((state.skillAnalysis?.skills||[]).map(item=>[item.skill.toLowerCase(),item]));
+      const names=[...new Set([...jd,...evidenceByName.keys()].map(name=>SKILLS.find(skill=>skill.name.toLowerCase()===name)?.name||name))];
+      return names.map(name=>{const skill=SKILLS.find(s=>s.name===name)||{name,why:evidenceByName.get(name.toLowerCase())?.why_it_matters||'Requirement identified in the supplied job description.'};const found=resume.includes(name);const weakEvidence=(name==='SQL'&&/\b(basic|introductory|beginner)\s+(sql|python)|\b(sql|python)\s*\(basic\)/i.test(state.resume))||(name==='Python'&&/\bpython\s*\(basic\)/i.test(state.resume));let status=found?(weakEvidence?'partial':'matched'):'missing';
+        const evidence=evidenceByName.get(name.toLowerCase());
+        if(evidence)status=evidence.status==='verified_strong'?'matched':evidence.status==='needs_depth'?'partial':'missing';
+        const quizScore=state.quizScores?.[name]??evidence?.quiz_score;
+        if(quizScore>=75&&status!=='matched')status='matched';
+        else if(quizScore<40&&quizScore!==undefined&&status==='matched')status='partial';
+        else if(quizScore<25&&quizScore!==undefined&&status==='partial')status='missing';
+        if(!evidence&&!found&&weakEvidence)status='partial';
+        return {...skill,status,evidence:evidence?.evidence||'',quizScore:quizScore??null};
+      });
+    }
+    function getAdaptiveTask(){
+      if(!state.adapted||!state.adaptSkill)return null;
+      const skill=state.adaptSkill;
+      if(state.adaptInterviewFocus)return [`Interview practice · ${state.adaptInterviewFocus}`,state.interviews[0]?.feedback?.followUp||`Practice a concise answer focused on ${state.adaptInterviewFocus}.`];
+      const tasks={
+        SQL:['Priority practice · SQL','Write one query using a join and a window function, then explain the result in two sentences.'],
+        Python:['Priority practice · Python','Clean a small CSV with pandas and document one validation check.'],
+        'Data visualization':['Priority practice · Data visualization','Build one chart with a clear metric definition and a one-sentence decision takeaway.'],
+        Statistics:['Priority practice · Statistics','Explain one uncertainty or sample-size limitation in your current analysis.'],
+        Experimentation:['Priority practice · Experimentation','Draft a hypothesis, primary metric, and one guardrail for a product change.'],
+        'Stakeholder communication':['Priority practice · Stakeholder communication','Write a three-sentence recommendation for a non-technical stakeholder.'],
+        dbt:['Priority practice · dbt','Create a small staging model and add one data-quality test.'],
+        'Cloud data warehouse':['Priority practice · Cloud data warehouse','Sketch how a raw event table becomes a clean, queryable analytics table.'],
+        'Product analytics':['Priority practice · Product analytics','Define an activation funnel and one retention question for a product team.'],
+        Git:['Priority practice · Git','Commit a small analysis with a README explaining how to reproduce it.']
+      };
+      return tasks[skill]||[`Priority practice · ${skill}`,`Create a small, reviewable example that demonstrates ${skill} for your target role.`];
+    }
+    function learningTaskCount(){return (state.plannerResult?.tasks?.length||sampleWeeks.reduce((n,w)=>n+w.tasks.length,0)+(getAdaptiveTask()?1:0))+(state.learningTasks?.length||0);}
+    function getStats(){const map=getSkillMap(),planTasks=state.plannerResult?.tasks,baseTasks=planTasks?.length?planTasks:sampleWeeks.flatMap((week,wi)=>week.tasks.map((_,ti)=>({id:`${wi}-${ti}`}))).concat(getAdaptiveTask()?[{id:`adapted-${state.adaptSkill}`}]:[]),done=baseTasks.filter(task=>state.completed[task.id]||task.completed).length+(state.learningTasks||[]).filter(task=>task.done).length,total=learningTaskCount(),projectsDone=Object.values(state.milestones).filter(Boolean).length,interviewAvg=state.interviews.length?Math.round(state.interviews.reduce((a,x)=>a+x.score,0)/state.interviews.length):null;return{map,matched:map.filter(x=>x.status==='matched').length,partial:map.filter(x=>x.status==='partial').length,gaps:map.filter(x=>x.status==='missing').length,readiness:map.length?Math.round((map.filter(x=>x.status==='matched').length+map.filter(x=>x.status==='partial').length*.5)/map.length*100):0,done,total,projectsDone,interviewAvg};}
+    function labelStatus(status){return status==='matched'?'Matched':status==='partial'?'Partially met':'Priority gap'}
+    function nav(page){currentPage=page;document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));document.getElementById('breadcrumb').textContent=`Your transition / ${({overview:'Dashboard & readiness',profile:'Smart intake',diagnostic:'Diagnostic quiz',skills:'Skill-gap map',scanner:'Vibe scanner',market:'Market value',roadmap:'Smart planner',projects:'Portfolio lab',challenges:'Proof-of-skill',resume:'Living resume',interview:'Mock interview',applications:'Application tracker',agent:'Career agent',account:'Account & sign in'})[page]||'Overview'}`;render();if(page==='market'&&!state.marketValue)void refreshMarket();if(page==='applications')void analyzeApplications();if(page==='resume')void loadUnlockedRoles();window.scrollTo({top:0,behavior:'smooth'});}
+    function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600);}
+    function escText(text){return escapeHtml(text)}
+    function statusTag(status){const cls=status==='matched'?'tag-match':status==='partial'?'tag-partial':'tag-missing';return `<span class="tag ${cls}">${labelStatus(status)}</span>`}
+    function metric(label,value,foot,icon){return `<article class="card metric"><span class="metric-icon">${icon}</span><div class="metric-label">${label}</div><div class="metric-value">${value}</div><div class="metric-foot">${foot}</div></article>`}
+    const DEMO_DIAGNOSTIC=[
+      {skill:'SQL',difficulty:'beginner',prompt:'Which SQL clause filters rows before grouping?',options:['WHERE','HAVING','ORDER BY','LIMIT'],answer:0,why:'WHERE filters source rows before aggregation.'},
+      {skill:'Statistics',difficulty:'beginner',prompt:'What does a 95% confidence interval communicate?',options:['A method that captures the true value in about 95% of repeated samples','A 95% chance every data point is correct','Proof that the treatment caused the result','The largest possible sample mean'],answer:0,why:'It describes repeated-sample coverage, not certainty about this one interval.'},
+      {skill:'Product analytics',difficulty:'intermediate',prompt:'A signup funnel conversion fell. What is the best first check?',options:['Validate instrumentation and compare affected steps and segments','Redesign the entire flow immediately','Remove users who did not convert','Compare only total monthly revenue'],answer:0,why:'Validate tracking first, then localize changes by step, segment, and time.'},
+      {skill:'Experimentation',difficulty:'intermediate',prompt:'Why define an experiment primary metric before launch?',options:['Reduce selective interpretation and align on the decision','Guarantee significance','Make every secondary metric improve','Avoid measuring guardrails'],answer:0,why:'A predeclared metric reduces cherry-picking and keeps the decision clear.'},
+      {skill:'SQL',difficulty:'intermediate',prompt:'How do you retain all customers while joining matching purchases?',options:['LEFT JOIN','INNER JOIN','CROSS JOIN','FULL JOIN then drop nulls'],answer:0,why:'A LEFT JOIN keeps every left-side customer.'},
+      {skill:'Python',difficulty:'intermediate',prompt:'A DataFrame has unexpected duplicates. What is the first step?',options:['Inspect row grain and duplicate keys before deleting rows','Drop every repeated value','Replace all missing values with zero','Sort alphabetically'],answer:0,why:'Understand the entity grain before removing records.'},
+      {skill:'Statistics',difficulty:'advanced',prompt:'A significant result appears after testing 40 metrics. What should you consider?',options:['Multiple comparisons and whether metrics were pre-specified','Only the largest effect','That all results are causal','Ignore the sample size'],answer:0,why:'Many tests raise false-positive risk; account for multiplicity.'},
+      {skill:'Experimentation',difficulty:'advanced',prompt:'A randomized test has a sample-ratio mismatch. What should you do?',options:['Investigate assignment and logging before interpreting outcomes','Ship the higher-mean variant','Exclude the smaller group','Extend without investigation'],answer:0,why:'Mismatch can indicate assignment or instrumentation problems.'},
+      {skill:'Data visualization',difficulty:'beginner',prompt:'Which chart usually shows change over evenly spaced time?',options:['Line chart','Pie chart','Word cloud','Treemap'],answer:0,why:'A line chart communicates a trend across ordered time.'},
+      {skill:'Stakeholder communication',difficulty:'intermediate',prompt:'A finding is directional but uncertain. How should you present it?',options:['Estimate, uncertainty, limitations, and decision implication','Hide uncertainty','Report only the p-value','Promise it will persist'],answer:0,why:'Transparent uncertainty makes evidence useful for decisions.'},
+      {skill:'Product analytics',difficulty:'advanced',prompt:'Why use a cohort view for retention?',options:['Compare groups by shared start event over elapsed time','Remove all seasonality','Prove feature causality','Guarantee return visits'],answer:0,why:'Cohorts align users by a common start point.'},
+      {skill:'Cloud data warehouse',difficulty:'intermediate',prompt:'Why define a table grain in an analytics model?',options:['Know what one row represents and prevent wrong aggregation','Reduce columns','Make it confidential','Avoid tests'],answer:0,why:'A clear grain is essential for joining and aggregation.'}
+    ];
+    function quizProgress(){return state.quizHistory?.length||0}
+    function localNextQuestion(){
+      const index=quizProgress(),base=DEMO_DIAGNOSTIC[index%DEMO_DIAGNOSTIC.length],recent=(state.quizHistory||[]).slice(-3),accuracy=recent.length?recent.filter(x=>x.correct).length/recent.length:.5;
+      const difficulty=accuracy>=.75?(base.difficulty==='beginner'?'intermediate':'advanced'):accuracy<.34?'beginner':base.difficulty;
+      return {...base,id:`demo-${index}`,difficulty,index};
+    }
+    function renderDiagnostic(s){
+      const count=quizProgress(),done=!!state.quizDone,score=done?Math.round(state.quizHistory.filter(x=>x.correct).length/12*100):0,q=state.quizQuestion;
+      const answeredSkills=Object.keys(state.quizScores||{}).length;
+      return `${pageHead('Onboarding · prove what you know','Your skills, put to the test.','A 12-question adaptive diagnostic helps separate things you’ve tried from skills you can demonstrate. The seed benchmark is illustrative—not a global labor-market dataset.')}
+        <div class="grid grid-2"><section class="card card-pad"><div class="section-heading" style="margin:0 0 12px"><div><h2 class="card-title">12-question role diagnostic</h2><p>Questions adapt in difficulty as you answer.</p></div><span class="tag tag-blue">${count}/12</span></div>
+          ${done?`<div class="report-card"><div class="eyebrow">Diagnostic complete</div><div class="insight-number" style="margin:8px 0">${score}%</div><p class="card-note">Verified practice score from ${count} questions. Use it as a learning signal—not a hiring prediction.</p><button class="btn btn-secondary btn-small" data-action="quiz-restart" style="margin-top:12px">Retake diagnostic</button></div><div class="divider"></div><div class="result-chart"><canvas id="diagnostic-radar" aria-label="Skill category breakdown"></canvas></div>`:
+          q?`<div class="progress-label"><span>Question ${count+1} of 12 · ${escText(q.skill)} · ${escText(q.difficulty)}</span><strong>${percent(count,12)}%</strong></div><div class="progress"><i style="width:${percent(count,12)}%"></i></div><div class="question-card" style="margin:14px 0"><div class="eyebrow">${escText(q.skill)}</div><p>${escText(q.prompt)}</p></div><form id="diagnostic-answer-form"><div style="display:grid;gap:8px">${q.options.map((option,i)=>`<label class="question-option"><input type="radio" name="answer" value="${i}" required><span>${escText(option)}</span></label>`).join('')}</div><button class="btn btn-primary" type="submit" style="margin-top:13px">Check answer & continue →</button></form><div class="field-help">Your selection is evaluated immediately. Difficulty shifts based on recent accuracy.</div>`:
+          `<div class="report-card"><div class="eyebrow">Start with evidence</div><h3 class="card-title" style="margin:9px 0">Show what you can do—not just what you’ve seen.</h3><p class="card-note">Questions adapt across SQL, analytics, statistics, experiments, communication, and data modeling for your target role: <strong>${escText(state.target)}</strong>.</p><button class="btn btn-primary" data-action="quiz-start" style="margin-top:13px">Start my 12-question diagnostic →</button></div>`}
+        </section><section class="card card-pad"><div class="section-heading" style="margin:0 0 13px"><div><h2 class="card-title">Global standing graph</h2><p>Demo percentile curve for orientation only.</p></div><span class="tag tag-neutral">Seed benchmark</span></div><div class="result-chart"><canvas id="percentile-chart" aria-label="Illustrative global percentile curve"></canvas></div><div class="callout"><span>ⓘ</span><p>This sample curve is synthetic; it does <strong>not</strong> represent verified global population data. A real benchmark requires a transparent, consented reference dataset.</p></div></section></div>
+        <div class="section-heading"><div><h2>Verified evidence</h2><p>${answeredSkills?`${answeredSkills} skill areas updated by your answers.`:'The map updates when you finish the diagnostic.'}</p></div><button class="btn btn-secondary btn-small" data-nav="skills">Open skill-gap map</button></div>
+        <section class="card card-pad">${Object.entries(state.quizScores||{}).length?Object.entries(state.quizScores).map(([skill,value])=>`<div class="list-row"><div class="row-main"><strong>${escText(skill)}</strong><span>Diagnostic evidence</span></div><span class="tag ${value>=75?'tag-match':value>=40?'tag-partial':'tag-missing'}">${value}%</span></div>`).join(''):'<div class="empty">Take the quiz to start collecting verified skills.</div>'}</section>`;
+    }
+    function renderDiagnosticCharts(){
+      if(!window.Chart)return;
+      const labels=['0','10','20','30','40','50','60','70','80','90','100'],curve=[0,2,6,14,25,42,61,77,89,96,100],score=state.quizDone?Math.round(quizProgress()?state.quizHistory.filter(x=>x.correct).length/12*100:0):0;
+      const context=document.getElementById('percentile-chart');
+      if(context){chartInstances.percentile?.destroy();const point=Array(11).fill(null);if(state.quizDone)point[Math.min(10,Math.round(score/10))]=score;chartInstances.percentile=new Chart(context,{type:'line',data:{labels,datasets:[{label:'Illustrative reference curve',data:curve,borderColor:'#34785f',backgroundColor:'rgba(52,120,95,.12)',fill:true,tension:.42,pointRadius:2},{label:'Your score',data:point,borderColor:'#e58b60',backgroundColor:'#e58b60',pointRadius:7,showLine:false,spanGaps:false}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Assessment score'}},y:{title:{display:true,text:'Illustrative cumulative percentile'},min:0,max:100}},plugins:{legend:{display:true,labels:{boxWidth:9,font:{size:10}}}}}});}
+      const radar=document.getElementById('diagnostic-radar');
+      if(radar){const categories=['SQL','Analysis','Experiments','Statistics','Communication','Modeling'];const values=categories.map(skill=>state.quizScores[skill]??(skill==='SQL'?state.quizScores['SQL']:undefined)??(state.quizScores['Product analytics']||0));chartInstances.radar?.destroy();chartInstances.radar=new Chart(radar,{type:'radar',data:{labels:categories,datasets:[{label:'Diagnostic signals',data:values,backgroundColor:'rgba(52,120,95,.16)',borderColor:'#34785f',pointBackgroundColor:'#34785f'}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{stepSize:25}}}}});}
+    }
+    function renderMarket(s){
+      const market=state.marketValue||localMarketEstimate();
+      const format=(num)=>`${market.currency} ${Number(num).toLocaleString()}`;
+      return `${pageHead('Career economics · directional','Let your proof compound.','Illustrative compensation range localizes to your profile and updates as verified skills, projects, and interview practice change.',`<button class="btn btn-primary" data-action="refresh-market">↻ Recalculate range</button>`)}
+        <div class="grid grid-3">${metric('Estimated annual floor',format(market.minimum),'Illustrative, not a compensation survey','↗')}${metric('Estimated annual ceiling',format(market.maximum),'Verify against local, current sources','✦')}${metric('Standing signal',`${market.percentile||0}th`,market.source||'Synthetic estimate; directional only','◈')}</div>
+        <div class="grid grid-2" style="margin-top:15px"><section class="card card-pad"><div class="section-heading" style="margin:0 0 12px"><div><h2 class="card-title">Your proof moves the estimate</h2><p>Role, region, verified skills, portfolio and interview signals.</p></div></div><div class="result-chart"><canvas id="market-chart" aria-label="Estimated market value range"></canvas></div></section>
+          <section class="card card-pad"><div class="eyebrow">Personalized estimate inputs</div><h2 class="card-title" style="margin:8px 0">Built from your current evidence</h2><div class="list-row"><div class="row-main"><strong>Target role and region</strong><span>${escText(state.target)} · ${escText(state.location||'United States')}</span></div></div><div class="list-row"><div class="row-main"><strong>Verified skill evidence</strong><span>${Object.values(state.quizScores||{}).filter(x=>x>=75).length} diagnostic-verified skill signals</span></div></div><div class="list-row"><div class="row-main"><strong>Portfolio and practice</strong><span>${Object.keys(state.milestones||{}).filter(key=>state.milestones[key]).length} milestones · ${state.interviews[0]?.score||0} latest interview score</span></div></div><div class="callout"><span>ⓘ</span><p>${escText(market.estimate_label||'Illustrative annual range. Not a salary offer or financial promise.')}</p></div></section></div>`;
+    }
+    function localMarketEstimate(){
+      const locations={'india':['INR',600000,1400000],'united states':['USD',55000,105000],'usa':['USD',55000,105000],'united kingdom':['GBP',32000,62000],'uk':['GBP',32000,62000],'canada':['CAD',55000,95000],'germany':['EUR',42000,72000],'australia':['AUD',65000,110000]},[currency,minimum,maximum]=locations[(state.location||'United States').toLowerCase()]||['USD',50000,95000];
+      const proof=Object.values(state.quizScores||{}).filter(score=>score>=75).length,projects=Object.values(state.milestones||{}).filter(Boolean).length,interview=state.interviews[0]?.score||0,uplift=Math.min(.35,proof*.025+Math.min(projects,4)*.025+interview/1000);
+      return{currency,minimum:Math.round(minimum*(1+uplift)),maximum:Math.round(maximum*(1+uplift)),percentile:Math.min(95,35+proof*4+Math.min(projects,4)*3+Math.floor(interview/10)),estimate_label:'Illustrative annual range; not a salary survey or offer guarantee.',source:'Synthetic directional estimate'};
+    }
+    function renderMarketChart(){
+      const canvas=document.getElementById('market-chart');if(!canvas||!window.Chart)return;
+      const value=state.marketValue||localMarketEstimate();chartInstances.market?.destroy();
+      chartInstances.market=new Chart(canvas,{type:'bar',data:{labels:['Illustrative annual compensation'],datasets:[{label:'Estimated range',data:[[value.minimum,value.maximum]],backgroundColor:'rgba(52,120,95,.72)',borderRadius:8}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{beginAtZero:true,title:{display:true,text:value.currency}},y:{grid:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:()=>`${value.currency} ${value.minimum.toLocaleString()} – ${value.maximum.toLocaleString()}`}}}}});
+    }
+    function renderPlanner(){
+      const result=state.plannerResult,done=Object.values(state.completed).filter(Boolean).length;
+      const tasks=result?.tasks||[];
+      return `${pageHead('Smart planner · realistic pacing','A plan that respects your life.','Choose your actual time budget. PivotPilot estimates feasibility, protects prerequisites, and moves missed work into open slots.',`<button class="btn btn-primary" data-action="calculate-plan">Build my schedule →</button>`)}
+        <section class="card card-pad"><div class="form-grid"><div><label class="field-label" for="plan-target-date">Target end date</label><input id="plan-target-date" class="field" type="date" value="${escText(state.targetDate||'')}"></div><div><label class="field-label" for="plan-hours">Available study hours per day</label><input id="plan-hours" class="field" type="number" min=".25" max="16" step=".25" value="${Number(state.studyHours)||1}"></div></div><div class="toolbar" style="margin-top:13px"><button class="btn btn-primary" data-action="calculate-plan">Check feasibility</button><button class="btn btn-secondary" data-action="priority-plan">Use 80/20 Priority Mode</button><button class="btn btn-soft" data-action="reschedule-plan">Reschedule missed tasks</button></div></section>
+        ${result?`<section class="${result.feasible?'callout':'warning-callout'}" style="margin-top:14px"><div><strong>${result.feasible?'Your schedule fits.':'Feasibility warning'}</strong><p style="font-size:11px;line-height:1.55;margin:5px 0">${escText(result.warning||`Estimated ${result.estimated_hours_needed} hours across ${result.target_days} days; your available budget is ${result.available_hours} hours. No extra hours needed.`)}</p>${!result.feasible?`<p style="font-size:11px;margin:6px 0">To finish by your date: <strong>${result.required_daily_hours} hrs/day</strong> (you entered ${Number(state.studyHours).toFixed(2)}).</p>`:''}</div></section>`:''}
+        <div class="grid grid-3" style="margin-top:14px">${metric('Learning tasks',tasks.length||13,`${done} completed`,'✓')}${metric('Estimated effort',`${result?.estimated_hours_needed||'~52'}h`,'Estimated total hours','◷')}${metric('Time budget',`${result?.available_hours||((state.studyHours||1)*84)}h`,'Available by target date','↗')}</div>
+        <div class="section-heading"><div><h2>Week-by-week schedule</h2><p>Foundations always precede applied practice. Completion persists locally.</p></div><span class="tag tag-neutral">${tasks.length?'API plan':'Seed plan'}</span></div>
+        ${tasks.length?tasks.map(task=>{const complete=!!(state.completed[task.id]||task.completed);return `<label class="task-item card card-pad ${complete?'done':''}" style="margin-bottom:8px"><input class="task-check" type="checkbox" data-action="planner-task" data-task="${escText(task.id)}" ${complete?'checked':''}><span class="task-copy"><strong>Week ${task.week}, day ${task.day} · ${escText(task.title)}</strong><p>${escText(task.skill)} · ${task.estimated_hours} hours${task.prerequisites?.length?` · Prerequisite: ${escText(task.prerequisites.join(', '))}`:''}</p></span></label>`}).join(''):sampleWeeks.map((week,wi)=>`<section class="card card-pad" style="margin-bottom:9px"><div class="eyebrow">Week ${wi+1} · ${escText(week.focus)}</div><h3 class="card-title" style="margin:6px 0 11px">${escText(week.title)}</h3>${week.tasks.map((task,ti)=>{const id=`${wi}-${ti}`,complete=!!state.completed[id];return `<label class="task-item ${complete?'done':''}"><input type="checkbox" class="task-check" data-action="task-check" data-task="${id}" ${complete?'checked':''}><span class="task-copy"><strong>${escText(task[0])}</strong><p>${escText(task[1])}</p></span><span class="tag tag-neutral">~1h</span></label>`}).join('')}</section>`).join('')}
+        ${state.learningTasks?.length?`<div class="section-heading"><div><h2>Scanner concepts added</h2><p>Prerequisite-aware items injected from the project reverse engineer.</p></div></div>${state.learningTasks.map((task,i)=>`<label class="task-item card card-pad"><input class="task-check" type="checkbox" data-action="custom-task" data-index="${i}" ${task.done?'checked':''}><span class="task-copy"><strong>${escText(task.title)}</strong><p>${escText(task.source||'Project scanner')} · ${task.estimated_hours||1} hour</p></span></label>`).join('')}`:''}`;
+    }
+    function renderScanner(){
+      const scan=state.scanResult;
+      return `${pageHead('Vibe-code reverse engineer','Understand what you shipped.','Paste a public website or GitHub repo. The safe scanner reads public metadata and supported root manifests—never executes code or touches private resources.',`<span class="tag ${apiStatus==='online'?'tag-match':'tag-neutral'}">${apiStatus==='online'?'API connected':'Demo preview'}</span>`)}
+        <section class="card card-pad"><form id="scanner-form" class="form-grid"><div class="form-field full"><label class="field-label" for="scan-url">Public website or GitHub repository URL</label><input class="field" id="scan-url" name="url" type="url" required placeholder="https://github.com/owner/repository"></div><div class="form-field full"><button class="btn btn-primary" type="submit">Inspect architecture safely →</button><div class="field-help">GitHub repos use public GitHub API metadata. Website scans only request public HTTPS pages and do not follow redirects.</div></div></form></section>
+        ${scan?`<div class="section-heading"><div><h2>${escText(scan.title||scan.url)}</h2><p>${scan.demo?'Demo preview; URL was not fetched.':'Inspected public metadata'} · ${scan.repository?'Public repository':'Website'}</p></div><span class="tag ${scan.demo?'tag-partial':'tag-match'}">${scan.demo?'Preview':'Scan complete'}</span></div><div class="grid grid-2">${(scan.stack||[]).map(layer=>`<section class="card card-pad"><div class="eyebrow">${escText(layer.layer)}</div><h3 class="card-title" style="margin:7px 0">${escText(layer.technologies?.join(' · ')||'Not detected')}</h3><p class="card-note">${escText(layer.evidence||'')}</p></section>`).join('')}</div><div class="grid grid-2" style="margin-top:14px"><section class="card card-pad"><div class="eyebrow">Must-learn engineering concepts</div><h3 class="card-title" style="margin:7px 0">Know how your project works</h3>${(scan.concepts||[]).map(x=>`<div class="list-row"><div class="row-icon">◇</div><div class="row-main"><strong>${escText(x)}</strong></div></div>`).join('')}<button class="btn btn-soft btn-small" data-action="inject-concepts" style="margin-top:12px">Add concepts to my plan →</button></section><section class="card card-pad"><div class="eyebrow">Scope & limitations</div><p class="card-note">${(scan.limitations||[]).map(escText).join('<br>')}</p><p class="field-help">This is architecture orientation, not a security review or code execution.</p></section></div>`:''}`;
+    }
+    function renderChallenges(){
+      const challenge=state.challenge,result=state.challengeResults?.[0];
+      return `${pageHead('Proof-of-skill lab','Earn your evidence.','Short practical challenges evaluate the work you submit—not just what you say you know. Strong results earn a reviewable assessment record.',`<span class="tag tag-neutral">${state.challengeResults?.length||0} reports saved</span>`)}
+        <div class="grid grid-2"><section class="card card-pad"><form id="challenge-create-form" class="form-grid"><div><label class="field-label">Skill to prove</label><select class="select" name="skill">${getSkillMap().map(x=>`<option>${escText(x.name)}</option>`).concat(['SQL','Python','Experimentation','Communication','Accessibility','JavaScript'].map(x=>`<option>${x}</option>`)).join('')}</select></div><div><label class="field-label">Difficulty</label><select class="select" name="difficulty"><option>beginner</option><option>intermediate</option><option>advanced</option></select></div><div class="form-field full"><button class="btn btn-primary" type="submit">Generate a practical challenge →</button></div></form>
+          ${challenge?`<div class="divider"></div><div class="eyebrow">${escText(challenge.difficulty)} · ${escText(challenge.skill)}</div><h3 class="card-title" style="margin:7px 0">${escText(challenge.title)}</h3><p class="card-note">${escText(challenge.scenario)}</p><ul>${(challenge.instructions||[]).map(x=>`<li class="card-note" style="margin:8px 0">${escText(x)}</li>`).join('')}</ul><form id="challenge-submit-form"><input type="hidden" name="challenge_id" value="${escText(challenge.challenge_id)}"><label class="field-label" for="challenge-answer">Submit your work / reasoning</label><textarea class="textarea" id="challenge-answer" name="submission" required placeholder="Include your approach, evidence, and what you would validate..."></textarea><button class="btn btn-primary" type="submit" style="margin-top:11px">Evaluate my submission</button></form>`:'<div class="empty">Choose a skill and level to generate your first challenge.</div>'}
+        </section><section class="card card-pad"><div class="eyebrow">Evidence rubric</div><h2 class="card-title" style="margin:8px 0">Scored on the actual submission</h2><div class="rubric">${[['Technical accuracy','25'],['Problem-solving','25'],['Practical implementation','25'],['Communication','25']].map(([n,s])=>`<div class="rubric-item"><span>${n}</span><strong>${s}<small style="font-size:9px;color:#99a29a"> pts</small></strong></div>`).join('')}</div><p class="card-note" style="margin-top:12px">Results are coaching feedback, not a credential, certification, or hiring recommendation.</p>${result?`<div class="divider"></div><div class="report-card"><div class="eyebrow">Latest assessment · ${escText(result.record_id)}</div><div class="insight-number">${result.score}/100</div><p class="card-note">${escText(result.feedback)}</p><div class="field-help">${(result.improvements||[]).map(escText).join(' · ')}</div><button class="btn btn-secondary btn-small" data-action="save-achievement" style="margin-top:10px">Save to Achievement Vault</button></div>`:''}</section></div>`;
+    }
+    function renderLivingResume(){
+      return `${pageHead('Milestone-to-market · Living resume','Your experience, always current.','Only add claims you can defend. Turn verified work into editable ATS-friendly bullets, approve what is true, and export your resume.',`<button class="btn btn-secondary" data-action="print-resume">Export / print PDF</button>`)}
+        <div class="grid grid-2"><section class="card card-pad"><div class="eyebrow">Verified learning & project milestones</div><h2 class="card-title" style="margin:8px 0">Propose an evidence-based bullet</h2><form id="bullet-form" class="auth-form" style="margin-top:12px"><div><label class="field-label">Milestone / project</label><input class="field" name="milestone_title" required placeholder="e.g. SQL retention analysis"></div><div><label class="field-label">What you actually did and evidence</label><textarea class="textarea" name="evidence" required placeholder="Tools, decisions, scope, verified result, and what you personally completed"></textarea></div><button class="btn btn-primary" type="submit">Draft ATS-friendly bullets →</button></form><div id="bullet-suggestions" style="margin-top:12px">${(state.pendingBullets||[]).map((bullet,i)=>`<label class="task-item"><input type="checkbox" data-action="approve-bullet" data-index="${i}"><span class="task-copy"><strong>Review before adding</strong><p>${escText(bullet)}</p></span></label>`).join('')}</div></section>
+          <section class="card card-pad" id="resume-paper"><div class="section-heading" style="margin:0 0 13px"><div><div class="eyebrow">Living resume · editable</div><h2 class="card-title" style="margin-top:5px">${escText(state.name||'Career pivot profile')}</h2></div><span class="tag tag-neutral">${state.target?escText(state.target):'Add a target role'}</span></div><label class="field-label" for="resume-editor">Approved bullets and profile summary</label><textarea id="resume-editor" class="textarea" style="min-height:320px" placeholder="Build your living resume from verified experience.">${escText(state.livingResumeText||[state.resume,...(state.livingResume||[])].filter(Boolean).join('\n\n'))}</textarea><div class="field-help">Edit and save here. PDF export opens your browser's print dialog.</div><button class="btn btn-soft btn-small" data-action="save-resume" style="margin-top:10px">Save my living resume</button><div class="divider"></div><div class="eyebrow">Roles you can explore now</div>${(state.unlockedRoles||[]).length?state.unlockedRoles.map(role=>`<div class="role-card" style="margin-top:8px"><strong>${escText(role.title)}</strong><div class="progress" style="margin:9px 0"><i style="width:${role.match}%"></i></div><span class="field-help">${role.match}% directional match · ${escText(role.evidence)} ${escText(role.requirements_to_check?.[0]||'')}</span></div>`).join(''):`<div id="unlocked-roles" class="role-card" style="margin-top:8px"><strong>${escText(state.target||'Target role')}</strong><div class="progress" style="margin:9px 0"><i style="width:${getStats().readiness}%"></i></div><span class="field-help">${getStats().readiness}% directional match · compare against each role's full requirements.</span></div>`}</section></div>`;
+    }
+    function renderAgent(){
+      const report=state.careerReport;
+      return `${pageHead('Personal career agent · You stay in control','Useful signals, never surprise actions.','Review matched opportunities, progress, deadlines, and portfolio improvements. This demo does not run background searches or contact anyone.',`<button class="btn btn-primary" data-action="weekly-report">Generate my weekly report →</button>`)}
+        <div class="callout" style="margin-bottom:14px"><span>🛡</span><p><strong>You approve every external action.</strong> PivotPilot never submits applications, emails recruiters, contacts employers, or edits external profiles. Monitoring in this scaffold is on-demand; scheduled alerts require a deployed worker and configured job source.</p></div>
+        <div class="grid grid-2"><section class="card card-pad"><div class="eyebrow">Agent activity</div><h2 class="card-title" style="margin:8px 0">Choose what to prepare</h2><label class="checkline"><input type="checkbox" id="agent-opportunities" checked>Find matching opportunities (demo recommendations only)</label><label class="checkline"><input type="checkbox" id="agent-reminders" checked>Surface application and interview deadlines</label><label class="checkline"><input type="checkbox" id="agent-portfolio" checked>Suggest portfolio improvements</label><label class="field-label" style="margin-top:11px">Report frequency</label><select class="select" id="agent-frequency"><option>Weekly · on demand</option><option>Monthly · on demand</option><option>Only when I ask</option></select><p class="field-help">No scheduled jobs or notifications are sent from this demo.</p></section>
+          <section class="card card-pad"><div class="eyebrow">Long-term direction</div><h2 class="card-title" style="margin:8px 0">${escText(state.target)}</h2><p class="card-note">I’ll keep recommendations anchored to your chosen target role, skill gaps, study pace, and application outcomes.</p>${report?`<div class="report-card" style="margin-top:12px"><span class="tag tag-match">${report.ai_generated?'Gemini report':'Demo report'}</span><h3 class="card-title" style="margin-top:10px">This week, focus on</h3><p class="card-note">${escText(report.progress_summary||'')}</p>${(report.weekly_focus||[]).map(x=>`<div class="list-row"><div class="row-icon">✦</div><div class="row-main"><strong>${escText(x)}</strong></div></div>`).join('')}</div>`:''}</section></div>
+        ${report?`<div class="section-heading"><div><h2>Opportunity monitor</h2><p>Demo seed recommendations; no live vacancies fetched.</p></div></div><div class="grid grid-2">${(report.opportunities||[]).map(item=>`<section class="card card-pad"><div class="project-head"><h3>${escText(item.title)}</h3><span class="tag tag-blue">${item.match||0}% directional match</span></div><p class="card-note">${escText(item.organization||item.source||'Demo opportunity')}</p><div class="callout" style="margin-top:11px"><p>${escText(item.why_match||'Review the full description and verify all requirements.')}</p></div></section>`).join('')}<section class="card card-pad"><div class="eyebrow">Portfolio improvement signals</div>${(report.portfolio_suggestions||[]).map(x=>`<div class="agent-action"><span>→</span><span class="card-note">${escText(x)}</span></div>`).join('')}</section><section class="card card-pad"><div class="eyebrow">Deadlines & reminders</div>${(report.reminders||[]).map(x=>`<div class="agent-action"><span>◷</span><span class="card-note">${escText(x)}</span></div>`).join('')||'<div class="empty">No upcoming deadlines found in your tracked applications.</div>'}</section></div>`:''}
+        <div class="section-heading"><div><h2>Approval queue</h2><p>External actions remain disabled until you explicitly approve them.</p></div><span class="tag tag-neutral">${state.agentApprovals?.length||0} awaiting your review</span></div><section class="card card-pad"><div class="empty">${state.agentApprovals?.length?'Review each proposal before taking any external action.':'No external actions queued. The agent only analyzes, prepares, and recommends.'}</div></section>`;
+    }
+    function render(){
+      const stats=getStats();document.getElementById('user-name').textContent=state.name||'Your profile';document.getElementById('avatar').textContent=(state.name||'P').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();document.getElementById('app-count').textContent=state.apps.length;
+      document.body.classList.toggle('dark-mode',state.theme==='dark');
+      const signedIn=currentUser?.email||'Sign in & sync';
+      document.getElementById('account-nav-label').textContent=signedIn;
+      document.getElementById('top-account-button').textContent=currentUser?'Account & sync':'Sign in & sync →';
+      document.getElementById('top-account-button').classList.toggle('btn-primary',!!currentUser);
+      document.getElementById('top-account-button').classList.toggle('btn-soft',!currentUser);
+      if(currentUser)setSyncStatus(syncState==='error'?'Cloud sync needs attention':syncState==='saving'?'Syncing changes…':'Synced to your account',syncState);
+      const renderers={overview:renderOverview,profile:renderProfile,diagnostic:renderDiagnostic,skills:renderSkills,scanner:renderScanner,market:renderMarket,roadmap:renderPlanner,projects:renderProjects,challenges:renderChallenges,resume:renderLivingResume,interview:renderInterview,applications:renderApplications,agent:renderAgent,account:renderAccount};
+      document.getElementById('view').innerHTML=renderers[currentPage](stats);
+      if(currentPage==='diagnostic')renderDiagnosticCharts();
+      if(currentPage==='market')renderMarketChart();
+    }
+    function renderAccount(){
+      const authReady=!!supabaseClient,config=supabaseConfig||{},active=currentUser;
+      const notice=authNotice?`<p class="auth-message ${authNoticeType==='error'?'error':''}" role="status">${escText(authNotice)}</p>`:'';
+      const recoveryForm=passwordRecovery?`<div class="divider"></div><h3 class="card-title">Choose a new password</h3>${notice}<form id="recovery-form" class="auth-form" style="margin-top:12px"><div><label class="field-label" for="new-password">New password</label><input id="new-password" class="field" type="password" name="password" autocomplete="new-password" minlength="8" required></div><div><label class="field-label" for="confirm-new-password">Confirm new password</label><input id="confirm-new-password" class="field" type="password" name="confirm" autocomplete="new-password" minlength="8" required></div><button class="btn btn-primary" type="submit">Update password</button></form>`:'';
+      const modeTabs=[['signin','Sign in'],['signup','Create account'],['magic','Email link']];
+      const modeTitle=authMode==='signup'?'Create your free account':authMode==='magic'?'Get a sign-in link':'Welcome back';
+      const localFileNotice=window.location.protocol==='file:'?`<div class="callout" style="margin-bottom:13px"><span>ⓘ</span><p><strong>Run this page from localhost or HTTPS to use authentication.</strong> Browsers restrict secure sign-in redirects from file:// pages. The local demo still works here.</p></div>`:'';
+      const projectSettings=`<details class="config-panel" ${!supabaseConfig?'open':''}><summary>${supabaseConfig?'Project connection settings':'Connect your Supabase project'}</summary>
+        <form id="supabase-config-form" class="auth-form" style="margin-top:12px"><div><label class="field-label" for="project-url">Supabase project URL</label><input id="project-url" class="field" name="url" type="url" required placeholder="https://your-project.supabase.co" value="${escText(config.url||'')}"></div><div><label class="field-label" for="publishable-key">Publishable / anon key</label><input id="publishable-key" class="field" name="key" type="password" required autocomplete="off" placeholder="sb_publishable_… or legacy anon public key" value="${escText(config.key||'')}"></div><div class="field-help">Use the project’s public publishable/anon key only. Never use a service_role or secret key in this browser app.</div><button class="btn btn-primary" type="submit">${supabaseConfig?'Save & reconnect':'Connect securely'}</button></form>
+        <div class="setup-steps"><div class="setup-step"><span class="step-index">1</span><span>Create a Supabase project and copy its Project URL + publishable key from Project Settings → API.</span></div><div class="setup-step"><span class="step-index">2</span><span>Run the included <a href="./supabase/schema.sql" target="_blank" rel="noopener">workspace schema & RLS setup SQL</a> in the Supabase SQL Editor.</span></div><div class="setup-step"><span class="step-index">3</span><span>Add your deployed app URL to Authentication → URL Configuration. For Google, also enable the Google provider and configure its OAuth redirect URI.</span></div></div>
+      </details>`;
+      let accountPanel;
+      if(active){
+        accountPanel=`<div class="account-status"><i class="save-dot"></i><span>Signed in as <strong>${escText(active.email||'')}</strong> · workspace sync is on</span></div><div class="card card-pad" style="box-shadow:none"><div class="eyebrow">Your account is ready</div><h2 class="card-title" style="margin:8px 0">Your career path follows you.</h2><p class="card-note">Your resume, roadmap, interview practice, and application tracker sync securely to your Supabase account. Local edits continue to save on this device too.</p><div class="setup-steps"><div class="setup-step"><span class="step-index">✓</span><span>Authenticated through Supabase Auth</span></div><div class="setup-step"><span class="step-index">✓</span><span>Personal workspace protected by row-level security</span></div><div class="setup-step"><span class="step-index">✓</span><span>Last sync: ${syncState==='error'?'needs attention':syncState==='saving'?'in progress':'up to date'}</span></div></div><div class="toolbar"><button class="btn btn-danger btn-small" data-action="signout">Sign out</button><button class="btn btn-secondary btn-small" data-action="disconnect-project">Disconnect project</button></div></div>${recoveryForm}${projectSettings}`;
+      }else if(!authReady){
+        accountPanel=`${localFileNotice}${notice}<div class="callout" style="margin-bottom:13px"><span>✦</span><p><strong>One quick setup first.</strong> Connect your Supabase project below. The app uses its public client key; your service-role key should never go in a browser.</p></div>${projectSettings}<p class="security-note"><span>ⓘ</span><span>The sample workspace remains available without signing in. Connect an account whenever you want private cloud backup and cross-device sync.</span></p>`;
+      }else{
+        accountPanel=`${localFileNotice}<h2 class="card-title">${modeTitle}</h2><p class="card-note">Your workspace is private to your account and stays available on your devices.</p><div class="auth-tabs" role="tablist">${modeTabs.map(([key,label])=>`<button type="button" class="auth-tab ${authMode===key?'active':''}" role="tab" aria-selected="${authMode===key}" data-action="auth-mode" data-mode="${key}">${label}</button>`).join('')}</div>${notice}<form id="auth-form" class="auth-form"><div><label class="field-label" for="auth-email">Email address</label><input id="auth-email" class="field" type="email" name="email" autocomplete="email" required placeholder="you@example.com"></div>${authMode!=='magic'?`<div><label class="field-label" for="auth-password">Password</label><input id="auth-password" class="field" type="password" name="password" autocomplete="${authMode==='signup'?'new-password':'current-password'}" minlength="8" required placeholder="At least 8 characters"></div>`:''}${authMode==='signup'?`<div><label class="field-label" for="auth-confirm">Confirm password</label><input id="auth-confirm" class="field" type="password" name="confirm" autocomplete="new-password" minlength="8" required placeholder="Enter your password again"></div>`:''}<button type="submit" class="btn btn-primary">${authMode==='signup'?'Create my account':authMode==='magic'?'Email me a secure sign-in link':'Sign in securely'} <span>→</span></button></form>${authMode==='signin'?`<button class="btn btn-secondary btn-small" style="margin-top:11px;width:100%" data-action="reset-password">Forgot password?</button>`:''}<div class="auth-divider">or continue with</div><button class="btn btn-secondary" style="width:100%" data-action="google-auth"><span style="font-weight:800">G</span> Continue with Google</button><div class="security-note"><span>▣</span><span>Authentication is handled by Supabase. Passwords are never stored in this app. Your workspace is secured per user with database row-level security. Enable Google under Supabase Authentication → Providers to use Google sign-in.</span></div>${projectSettings}`;
+      }
+      return `${pageHead('Your account · Private cloud sync','Your next move, wherever you are.','Sign in to keep your career workspace private, backed up, and in sync across devices. The sample demo still works without an account.')}
+        <div class="account-shell"><section class="account-card"><div class="account-story"><div><div class="brand"><div class="brand-mark" style="background:#d7ed78;color:#284831">P</div><div class="brand-name">PivotPilot <span>AI</span></div></div><div class="eyebrow">A path that moves with you</div><h2>Make room for the work you’re becoming.</h2><p>Your progress isn’t just a checklist. Keep the skills, stories, and small wins you build—all connected to your own career workspace.</p><div class="account-points"><div class="account-point"><span class="account-check">✓</span>Resume and role fit, saved privately</div><div class="account-point"><span class="account-check">✓</span>Learning and portfolio progress, in sync</div><div class="account-point"><span class="account-check">✓</span>One place for every application and practice run</div></div></div><div class="account-quote">“Your next chapter doesn’t need a perfect plan. It needs a first step—and a place to keep going.”<br><strong>— Your PivotPilot workspace</strong></div></div><div class="account-form-side">${accountPanel}<button class="btn btn-secondary btn-small" style="margin-top:14px" data-nav="overview">← Continue with the interactive demo</button></div></section></div>`;
+    }
+    function authRedirectUrl(){return window.location.protocol==='file:'?undefined:`${window.location.origin}${window.location.pathname}`;}
+    function loadSupabaseSdk(){
+      if(window.supabase?.createClient)return Promise.resolve(window.supabase);
+      if(!supabaseSdkPromise)supabaseSdkPromise=new Promise((resolve,reject)=>{
+          const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js';script.async=true;
+          script.onload=()=>window.supabase?.createClient?resolve(window.supabase):reject(new Error('The Supabase JavaScript client did not load from the CDN.'));
+          script.onerror=()=>reject(new Error('Could not load the Supabase client. Check your network or CDN access.'));
+          document.head.appendChild(script);
+        }).catch(error=>{supabaseSdkPromise=null;throw error;});
+      return supabaseSdkPromise;
+    }
+    async function initializeSupabase(){
+      if(!supabaseConfig?.url||!supabaseConfig?.key){supabaseClient=null;setSyncStatus('Saved on this device','local');return;}
+      try{
+        const {createClient}=await loadSupabaseSdk();
+        authSubscription?.unsubscribe();
+        supabaseClient=createClient(supabaseConfig.url,supabaseConfig.key,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true,flowType:'pkce'}});
+        authSubscription=supabaseClient.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY')passwordRecovery=true;void handleAuthSession(session);}).data.subscription;
+        const {data,error}=await supabaseClient.auth.getSession();
+        if(error)throw error;
+        await handleAuthSession(data.session);
+        authNotice='Supabase is connected. Sign in, create an account, or use an email link.';
+        authNoticeType='info';
+      }catch(error){
+        clearTimeout(cloudSaveTimer);authSubscription?.unsubscribe();authSubscription=null;
+        if(currentUser)state=structuredClone(anonymousWorkspace);
+        supabaseClient=null;currentUser=null;lastCloudUserId=null;
+        authNotice=`Could not connect to Supabase: ${error.message||'Check the project URL, key, and network connection.'}`;
+        authNoticeType='error';
+        try{localStorage.setItem(STORE_KEY,JSON.stringify(state));}catch(storageError){console.error('Could not restore the anonymous local workspace after a Supabase connection failure.',storageError);}
+        setSyncStatus('Saved on this device','local');
+        console.error('Supabase initialization failed.',error);
+      }
+      if(currentPage==='account')render();
+    }
+    async function handleAuthSession(session){
+      const previousUserId=currentUser?.id;
+      currentUser=session?.user||null;
+      if(!currentUser){if(previousUserId){clearTimeout(cloudSaveTimer);state=structuredClone(anonymousWorkspace);save();}lastCloudUserId=null;cloudLoadingUserId=null;cloudLoadPromise=null;setSyncStatus('Saved on this device','local');if(currentPage==='account')render();return;}
+      if(previousUserId&&previousUserId!==currentUser.id)state=structuredClone(anonymousWorkspace);
+      if(lastCloudUserId!==currentUser.id){
+        const userId=currentUser.id;
+        lastCloudUserId=userId;cloudLoadingUserId=userId;setSyncStatus('Loading your workspace…','saving');
+        const pendingLoad=loadCloudWorkspace(userId);cloudLoadPromise=pendingLoad;
+        try{await pendingLoad;if(currentUser?.id===userId)setSyncStatus('Synced to your account','cloud');}
+        catch(error){if(currentUser?.id===userId){console.error('Could not load the Supabase workspace.',error);setSyncStatus('Cloud sync needs attention','error');authNotice='You are signed in, but your cloud workspace could not load. Check that the included SQL setup ran successfully.';authNoticeType='error';}}
+        finally{if(cloudLoadingUserId===userId){cloudLoadingUserId=null;cloudLoadPromise=null;}}
+      }else if(cloudLoadingUserId===currentUser.id&&cloudLoadPromise)return;
+      else setSyncStatus('Synced to your account','cloud');
+      render();
+    }
+    async function loadCloudWorkspace(userId){
+      const {data,error}=await supabaseClient.from('user_workspaces').select('workspace').eq('user_id',userId).maybeSingle();
+      if(error)throw error;
+      if(currentUser?.id!==userId)return;
+      if(data?.workspace){
+        if(data.workspace.version!==1)throw new Error('Unsupported workspace data version.');
+        state={...structuredClone(sampleState),...data.workspace,apps:Array.isArray(data.workspace.apps)?data.workspace.apps:[],completed:data.workspace.completed||{},milestones:data.workspace.milestones||{}};
+        localStorage.setItem(userStoreKey(userId),JSON.stringify(state));render();return;
+      }
+      if(currentUser?.id!==userId)return;
+      const {error:insertError}=await supabaseClient.from('user_workspaces').insert({user_id:userId,workspace:state});
+      if(insertError)throw insertError;
+      localStorage.setItem(userStoreKey(userId),JSON.stringify(state));
+    }
+    function validateProjectConfig(urlText,key){
+      let url;
+      try{url=new URL(urlText);}catch{return 'Enter a valid Supabase project URL.';}
+      const localHost=['localhost','127.0.0.1','[::1]'].includes(url.hostname);
+      if(url.protocol!=='https:'&&!(url.protocol==='http:'&&localHost))return 'Use an HTTPS project URL (HTTP is allowed for localhost development).';
+      if(url.username||url.password||url.search||url.hash||url.pathname!=='/')return 'Enter only the project URL, without credentials, paths, or query parameters.';
+      let isPublicKey=key.startsWith('sb_publishable_');
+      if(!isPublicKey&&key.split('.').length===3){
+        try{const payload=JSON.parse(atob(key.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));isPublicKey=payload.role==='anon';}catch{}
+      }
+      if(!isPublicKey)return 'Use a Supabase publishable key or legacy anon public key. Secret/service-role keys are rejected for browser safety.';
+      return '';
+    }
+    function authErrorMessage(error){
+      const message=error?.message||'Authentication failed. Please try again.';
+      if(/invalid login credentials/i.test(message))return 'Email or password is incorrect. Try again or use “Forgot password?”.';
+      if(/email not confirmed/i.test(message))return 'Confirm your email from the link we sent, then sign in.';
+      return message;
+    }
+    async function submitAuth(form){
+      if(!supabaseClient){authNotice='Connect your Supabase project before signing in.';authNoticeType='error';render();return;}
+      const data=new FormData(form),email=String(data.get('email')||'').trim(),password=String(data.get('password')||'');
+      if(authMode==='signup'&&password!==String(data.get('confirm')||'')){authNotice='Those passwords do not match.';authNoticeType='error';render();return;}
+      const submit=form.querySelector('button[type="submit"]');if(submit){submit.disabled=true;submit.textContent='Working securely…';}
+      authNotice='';authNoticeType='info';
+      try{
+        let result;
+        if(authMode==='signup')result=await supabaseClient.auth.signUp({email,password,options:authRedirectUrl()?{emailRedirectTo:authRedirectUrl()}:{}});
+        else if(authMode==='magic')result=await supabaseClient.auth.signInWithOtp({email,options:authRedirectUrl()?{emailRedirectTo:authRedirectUrl()}:{}});
+        else result=await supabaseClient.auth.signInWithPassword({email,password});
+        if(result.error)throw result.error;
+        if(authMode==='signup'&&!result.data.session)authNotice='Account created. Check your inbox to confirm your email, then come back to sign in.';
+        else if(authMode==='magic')authNotice='Secure sign-in link sent. Check your inbox, including spam or promotions.';
+        else{authNotice='Signed in. Loading your private workspace…';if(result.data.session)await handleAuthSession(result.data.session);}
+        authNoticeType='info';render();
+      }catch(error){authNotice=authErrorMessage(error);authNoticeType='error';render();}
+    }
+    async function submitPasswordChange(form){
+      const data=new FormData(form),password=String(data.get('password')||''),confirmation=String(data.get('confirm')||'');
+      if(password!==confirmation){authNotice='Those passwords do not match.';authNoticeType='error';render();return;}
+      try{const {error}=await supabaseClient.auth.updateUser({password});if(error)throw error;passwordRecovery=false;authNotice='Your password has been updated.';authNoticeType='info';render();}
+      catch(error){authNotice=authErrorMessage(error);authNoticeType='error';render();}
+    }
+    function pageHead(eyebrow,title,subtitle,action=''){return `<div class="page-head"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p class="subhead">${subtitle}</p></div>${action}</div>`}
+    function renderOverview(s){
+      const next=s.map.find(x=>x.status==='missing')||s.map.find(x=>x.status==='partial');
+      const plannedTask=state.plannerResult?.tasks?.find(task=>!state.completed[task.id]&&!task.completed);
+      const nextTask=Array.isArray(state.plannerResult?.tasks)?(plannedTask?{...plannedTask,taskId:plannedTask.id}:null):sampleWeeks.flatMap((w,wi)=>w.tasks.map((t,ti)=>({w,wi,t,ti}))).find(x=>!state.completed[`${x.wi}-${x.ti}`]);
+      const role=escapeHtml(state.target||'your next role');
+      const appInsight=getApplicationInsight();
+      return `${pageHead('Your career, in motion','A clearer path to your next role.','Your transition plan is built around your experience, real job requirements, and the proof you can create.')}
+        <section class="hero"><div class="hero-content"><div class="eyebrow">Your next chapter</div><h1>${role} is closer than it feels.</h1><p>Turn the experience you already have into a focused plan. See what matches, close the most important gaps, and show your readiness with real work.</p><div class="hero-actions"><button class="btn btn-primary" data-nav="skills">Explore my skill map <span>→</span></button><button class="btn btn-secondary" data-nav="profile">Edit career profile</button></div></div></section>
+        <div class="section-heading"><div><h2>Your readiness snapshot</h2><p>Calculated from your resume and ${s.map.length||'no'} skill requirements in the job description.</p></div><span class="tag tag-neutral">Live analysis</span></div>
+        <div class="grid grid-4">${metric('Role readiness',`${s.readiness}%`,`${s.matched} matched · ${s.partial} partial · ${s.gaps} gaps`,'◈')}${metric('Learning progress',`${s.done}/${s.total}`,`${percent(s.done,s.total)}% of planned tasks complete`,'↗')}${metric('Portfolio proof',`${s.projectsDone}`,`${Object.keys(state.milestones).length?`milestones checked`:'projects ready to build'}`,'◇')}${metric('Interview average',s.interviewAvg===null?'—':`${s.interviewAvg}`,s.interviewAvg===null?'Try a practice question to get started':'Average score out of 100','◎')}</div>
+        <div class="grid grid-2" style="margin-top:16px">
+          <section class="card card-pad"><div class="section-heading" style="margin:0 0 15px"><div><h2>One move to make this week</h2><p>A small action with a clear payoff.</p></div><span class="tag tag-blue">Suggested</span></div>
+            ${nextTask?`<div class="list-row"><div class="row-icon">✦</div><div class="row-main"><strong>${escText(nextTask.t?.[0]||nextTask.title)}</strong><span>${escText(nextTask.t?.[1]||`${nextTask.skill} · ${nextTask.estimated_hours} hours`)}</span></div></div><div class="toolbar" style="margin-top:14px"><button class="btn btn-primary btn-small" data-action="complete-task" data-task="${escText(nextTask.taskId||`${nextTask.wi}-${nextTask.ti}`)}">Mark complete</button><button class="btn btn-secondary btn-small" data-nav="roadmap">Open learning plan</button></div>`:`<div class="callout"><p><strong>All roadmap tasks complete.</strong> Adapt your plan or build another portfolio milestone.</p></div>`}
+            ${next?`<div class="divider"></div><div class="row-main"><strong>Highest-priority gap: ${escText(next.name)}</strong><span>${escText(next.why)}</span></div>`:''}
+          </section>
+          <section class="card card-pad"><div class="section-heading" style="margin:0 0 14px"><div><h2>Applications are teaching you</h2><p>${appInsight.summary}</p></div><button class="btn btn-secondary btn-small" data-nav="applications">View tracker →</button></div>
+            ${appInsight.bars||'<div class="empty">Add applications to discover which approaches resonate.</div>'}
+            ${appInsight.recommendation?`<div class="callout" style="margin-top:13px"><span>✦</span><p>${appInsight.recommendation}</p></div>`:''}
+          </section>
+        </div>
+        <div class="section-heading"><div><h2>Start anywhere</h2><p>Everything updates as you make progress.</p></div><button class="btn btn-soft btn-small" data-action="adapt">↻ Recalculate plan</button></div>
+        <div class="grid grid-3">
+          <button class="card card-pad" style="text-align:left;border:1px solid var(--line)" data-nav="skills"><div class="eyebrow">01 · Focus</div><h3 class="card-title" style="margin-top:9px">Know what to close</h3><p class="card-note">See the requirements that matter, why they show up, and how to prove them.</p></button>
+          <button class="card card-pad" style="text-align:left;border:1px solid var(--line)" data-nav="projects"><div class="eyebrow">02 · Build</div><h3 class="card-title" style="margin-top:9px">Make your work visible</h3><p class="card-note">Turn priority gaps into portfolio projects with tangible, reviewable deliverables.</p></button>
+          <button class="card card-pad" style="text-align:left;border:1px solid var(--line)" data-nav="interview"><div class="eyebrow">03 · Practice</div><h3 class="card-title" style="margin-top:9px">Tell a stronger story</h3><p class="card-note">Practice against a transparent rubric and use the feedback to shape your next step.</p></button>
+        </div>`;
+    }
+    function renderProfile(){
+      const strengths=extractFound(state.resume);
+      return `${pageHead('Step 1 · Set your direction','Your experience, translated.','Add your background and a real target job description. PivotPilot compares your evidence with role requirements and uses the results throughout your workspace.',`<button class="btn btn-soft" data-action="sample">↻ Load sample profile</button>`)}
+        <div class="grid grid-2">
+          <section class="card card-pad"><div class="section-heading" style="margin:0 0 16px"><div><h2 class="card-title">Career starting point</h2><p>Paste a resume or upload PDF, DOCX, Markdown, CSV, or text.</p></div><span class="tag tag-neutral">Private workspace</span></div>
+            <form id="profile-form"><div class="form-grid">
+              <div class="form-field"><label class="field-label" for="candidate-name">Your name</label><input class="field" id="candidate-name" name="name" value="${escText(state.name)}" placeholder="e.g. Alex Morgan"></div>
+              <div class="form-field"><label class="field-label" for="target-role">Target role</label><input class="field" id="target-role" name="target" value="${escText(state.target)}" placeholder="e.g. Product Data Analyst" required></div>
+              <div class="form-field full"><label class="field-label" for="resume">Resume or background</label><textarea class="textarea" id="resume" name="resume" placeholder="Paste your resume, profile, or experience summary...">${escText(state.resume)}</textarea><div class="field-help">Resume text is parsed by the API when available; otherwise, local skill matching remains available.</div><input id="resume-file" type="file" accept=".pdf,.docx,.txt,.md,.csv,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" class="field" style="margin-top:9px;padding:8px" aria-label="Upload resume file"></div>
+              <div class="form-field full"><label class="field-label" for="job-description">Target job description(s)</label><textarea class="textarea" id="job-description" name="jd" placeholder="Paste the job description(s) you want to target...">${escText(state.jd)}</textarea><div class="field-help">Paste one or more descriptions. Requirements found across all pasted text are compared with your profile.</div></div>
+              <div class="form-field"><label class="field-label" for="candidate-location">Location for market estimates</label><input class="field" id="candidate-location" name="location" value="${escText(state.location||'United States')}" placeholder="Country or region"></div>
+              <div class="form-field"><label class="field-label" for="candidate-hours">Study hours per day</label><input class="field" id="candidate-hours" name="study_hours" type="number" min=".25" max="16" step=".25" value="${Number(state.studyHours)||1}"></div>
+              <div class="form-field"><label class="field-label" for="candidate-start-date">Plan start date</label><input class="field" id="candidate-start-date" name="start_date" type="date" value="${escText(state.startDate||'')}"></div>
+              <div class="form-field"><label class="field-label" for="candidate-target-date">Target end date</label><input class="field" id="candidate-target-date" name="target_date" type="date" value="${escText(state.targetDate||'')}"></div>
+              <div class="form-field full"><button class="btn btn-primary" type="submit">Save profile & refresh my path <span>→</span></button></div>
+            </div></form>
+          </section>
+          <div class="grid" style="align-content:start">
+            <section class="card card-pad"><div class="section-heading" style="margin:0 0 12px"><div><h2 class="card-title">What we picked up</h2><p>Updates as you edit your profile.</p></div><span class="tag tag-match">${strengths.length} skills found</span></div>
+              <div id="profile-preview" class="toolbar">${strengths.length?strengths.map(x=>`<span class="tag tag-neutral">${escText(x)}</span>`).join(''):'<span class="card-note">Add a resume or background to see your existing strengths.</span>'}</div>
+              <div class="divider"></div><div class="row-main"><strong>Target role</strong><span id="role-preview">${escText(state.target||'Add a target role to begin.')}</span></div>
+              <div class="divider"></div><div class="row-main"><strong>Job requirements found</strong><span id="requirements-preview">${getSkillMap().length?getSkillMap().map(x=>escText(x.name)).join(' · '):'Paste a job description to identify requirements.'}</span></div>
+            </section>
+            <section class="card card-pad"><div class="eyebrow">How the analysis works</div><h2 class="card-title" style="margin:8px 0">Grounded in what you share</h2><p class="card-note">This demo identifies skill terms from your resume and job descriptions in your browser. Matched, partial, and missing labels are directional—not an automated hiring decision. Edit either input to immediately change the map.</p></section>
+          </div>
+        </div>`;
+    }
+    function renderSkills(){
+      const map=getSkillMap(),list=skillFilter==='all'?map:map.filter(x=>x.status===skillFilter);
+      const groups=[['matched','Matched'],['partial','Partially met'],['missing','Priority gaps']];
+      return `${pageHead('Step 2 · Find your leverage','The skill map.','Every requirement comes from your target job description. Select any skill for context and a resume bullet to make your own.',`<button class="btn btn-secondary" data-nav="profile">Edit resume or role</button>`)}
+        <section class="card card-pad"><div class="grid grid-3">
+          ${groups.map(([key,label])=>`<div><div class="metric-label">${label}</div><div style="font-size:23px;font-weight:800;margin:7px 0">${map.filter(x=>x.status===key).length}</div><div class="progress"><i style="width:${percent(map.filter(x=>x.status===key).length,map.length)}%;background:${key==='matched'?'#4c9367':key==='partial'?'#d79a4c':'#ce7166'}"></i></div></div>`).join('')}
+        </div><div class="divider"></div><div class="toolbar">${[['all','All requirements'],['matched','Matched'],['partial','Partially met'],['missing','Priority gaps']].map(([key,label])=>`<button class="filter-chip ${skillFilter===key?'active':''}" data-action="skill-filter" data-filter="${key}">${label}</button>`).join('')}</div></section>
+        ${map.length?`<div class="grid grid-3" style="margin-top:14px">${list.map(skill=>`<article class="card skill-card" data-action="skill-detail" data-skill="${escText(skill.name)}" tabindex="0" role="button"><div class="skill-card-top"><div><h3>${escText(skill.name)}</h3>${statusTag(skill.status)}</div><span style="color:#a1aaa2">↗</span></div><p>${escText(skill.why)}</p><div class="skill-mini"><i style="width:${skill.status==='matched'?100:skill.status==='partial'?48:12}%;background:${skill.status==='matched'?'#4c9367':skill.status==='partial'?'#d79a4c':'#ce7166'}"></i></div><div class="field-help">${skill.status==='matched'?'Found in your background':skill.status==='partial'?'Related or beginner-level evidence found':'Not found in your resume yet'}</div></article>`).join('')}</div>`:
+        `<section class="card empty">Add a target job description in My profile to build your skill map. <button class="btn btn-soft btn-small" data-nav="profile" style="margin-left:8px">Add a job description</button></section>`}
+        <div class="section-heading"><div><h2>Turn evidence into a strong bullet</h2><p>Use your actual experience—never claim a skill or outcome you haven't earned.</p></div></div>
+        <section class="card card-pad"><div class="grid grid-2"><div><div class="eyebrow">Bullet framework</div><h3 class="card-title" style="margin:8px 0">Action + method + measurable impact</h3><p class="card-note">Start with what you did, name the tool or approach, and end with what changed. Keep the numbers honest and be ready to explain how you measured them.</p></div><div class="callout"><span>✦</span><p><strong>Starting point:</strong> “Built weekly team performance reports in spreadsheets, identified repeat-contact patterns, and partnered on workflow changes that reduced escalations by 18%.” Adapt this with the exact tools, scope, and results from your own work.</p></div></div></section>`;
+    }
+    function renderRoadmap(){
+      const total=learningTaskCount(),done=getStats().done,adaptive=getAdaptiveTask();
+      return `${pageHead('Step 3 · Build the evidence','A plan you can actually finish.','Short weekly modules connect your most important gaps to practice, portfolio evidence, and interview readiness.',`<button class="btn btn-primary" data-action="adapt">↻ Recalculate / adapt</button>`)}
+        <div class="grid grid-2" style="margin-bottom:15px"><section class="card card-pad"><div class="progress-label"><span>Overall learning progress</span><strong>${percent(done,total)}%</strong></div><div class="progress"><i style="width:${percent(done,total)}%"></i></div><p class="card-note">${done} of ${total} tasks checked off · saved automatically on this device</p></section>
+          <section class="card card-pad"><div class="eyebrow">Adjust to your pace</div><div class="row-main" style="margin-top:7px"><strong>${state.paceNote?`Current focus: ${escText(state.paceNote)}`:'Need a lighter week?'}</strong><span>Log a roadblock or slower pace and the upcoming plan will shift priorities.</span></div><button class="btn btn-secondary btn-small" data-action="roadblock" style="margin-top:10px">Log a roadblock / slower pace</button>${state.adapted?'<span class="tag tag-match" style="margin-left:7px">Plan recalculated</span>':''}</section></div>
+        ${state.adaptInterviewFocus?`<div class="callout" style="margin-bottom:13px"><span>◎</span><p><strong>Practice focus from your latest rubric:</strong> ${escText(state.adaptInterviewFocus)}. The first week now starts with a targeted interview exercise.</p></div>`:''}
+        ${sampleWeeks.map((week,wi)=>{const weekTasks=week.tasks.map((task,ti)=>({task,key:`${wi}-${ti}`}));if(wi===0&&adaptive)weekTasks.unshift({task:adaptive,key:`adapted-${state.adaptSkill}`});const weekDone=weekTasks.filter(item=>state.completed[item.key]).length;return `<section class="card week" style="margin-bottom:13px"><div class="week-head"><div class="week-number">W${wi+1}</div><div class="week-meta"><h3>${escText(week.title)}</h3><p>${escText(week.focus)}${wi===0&&adaptive?` · Priority: ${escText(state.adaptInterviewFocus?'interview practice':state.adaptSkill)}`:''}</p></div><span class="tag tag-neutral">${weekDone}/${weekTasks.length} done</span></div><div class="task-list">${weekTasks.map(({task,key})=>{const done=!!state.completed[key];return `<label class="task-item ${done?'done':''}"><input type="checkbox" class="task-check" data-action="task-check" data-task="${key}" ${done?'checked':''}><span class="task-copy"><strong>${escText(task[0])}</strong><p>${escText(task[1])}</p></span><span class="tag tag-neutral">~1h</span></label>`}).join('')}</div></section>`}).join('')}
+        <section class="card card-pad"><div class="eyebrow">Make it yours</div><h2 class="card-title" style="margin:7px 0">Tell us what's getting in the way</h2><p class="card-note">A busy week, a confusing topic, or a new priority can all change the plan. Your progress stays intact when you adapt.</p>${state.paceNote?`<div class="callout" style="margin-top:12px"><p><strong>Roadblock noted:</strong> ${escText(state.paceNote)}. The next uncompleted tasks have been re-ordered to protect the most relevant skill gap.</p></div>`:''}</section>`;
+    }
+    function makeProjects(){
+      if(state.generatedProjects?.length)return state.generatedProjects.map((project,index)=>({
+        id:`generated-${index}`,name:project.title,scope:project.problem,skills:project.tech_stack||[],
+        deliverables:project.milestones||[],proof:project.interview_proof||project.bridge
+      }));
+      const map=getSkillMap(),gaps=map.filter(x=>x.status!=='matched').map(x=>x.name);
+      const focus=gaps.length?gaps:['Product analytics','Stakeholder communication'];
+      return [
+        {id:'p1',name:`Product activation & retention analysis`,scope:`Analyze a product-events dataset to find where new users get stuck and propose an experiment.`,skills:[focus[0]||'SQL',focus.find(x=>x==='Experimentation')||'Experimentation','Data visualization'],deliverables:['SQL analysis notebook with documented assumptions','Retention or funnel dashboard with clear definitions','Experiment brief: hypothesis, metric, guardrails, and caveats'],proof:'Demonstrates analytical problem framing, product metrics, and a decision-ready recommendation.'},
+        {id:'p2',name:'A trusted analytics data model',scope:'Build a small, reproducible pipeline that turns raw event records into tested, documented analysis tables.',skills:[focus.find(x=>x==='dbt')||'dbt',focus.find(x=>x==='Python')||'Python',focus.find(x=>x==='Cloud data warehouse')||'Cloud data warehouse'],deliverables:['Clean staging and mart models with explicit grain','At least three data-quality checks and a useful README','A small dashboard or query answering a stakeholder question'],proof:'Shows the discipline to produce reliable, maintainable data—not just a one-off chart.'},
+        {id:'p3',name:'Customer support signal explorer',scope:'Use ticket or review data to reveal recurring customer friction and make a prioritized product recommendation.',skills:[focus.find(x=>x==='Python')||'Python',focus.find(x=>x==='Stakeholder communication')||'Stakeholder communication','Data visualization'],deliverables:['Documented cleaning and categorization approach','A concise visual summary of themes and frequency','A one-page recommendation with limitations and next steps'],proof:'Connects your existing customer-operations insight to measurable product and customer outcomes.'}
+      ];
+    }
+    function renderProjects(){
+      return `${pageHead('Step 4 · Show, don’t just tell','Portfolio projects with a point.','Each project ties directly to gaps in your target role. Scope it small, publish the evidence, and explain what you learned.',`<div class="toolbar"><button class="btn btn-primary" data-action="generate-projects">Generate gap-matched projects →</button><button class="btn btn-secondary" data-nav="skills">Review skill gaps</button></div>`)}
+        <div class="callout" style="margin-bottom:15px"><span>✦</span><p><strong>Matched to your current gaps.</strong> ${getSkillMap().filter(x=>x.status!=='matched').map(x=>escText(x.name)).join(' · ')||'You have strong resume alignment—projects can deepen your evidence and help tell your story.'}</p></div>
+        <div class="grid grid-2">${makeProjects().map(project=>{const total=project.deliverables.length,done=project.deliverables.filter((_,i)=>state.milestones[`${project.id}-${i}`]).length;return `<article class="card project-card"><div class="project-head"><h3>${escText(project.name)}</h3><span class="tag tag-blue">${done}/${total} milestones</span></div><p>${escText(project.scope)}</p><div class="eyebrow">Skills this demonstrates</div><div class="toolbar" style="margin-top:7px">${[...new Set(project.skills)].map(name=>`<span class="tag ${getSkillMap().find(x=>x.name===name)?.status==='matched'?'tag-match':'tag-partial'}">${escText(name)}</span>`).join('')}</div><div class="divider"></div><div class="eyebrow">Build checklist</div>${project.deliverables.map((item,i)=>`<div class="milestone-row"><label class="checkline"><input type="checkbox" data-action="milestone" data-milestone="${project.id}-${i}" ${state.milestones[`${project.id}-${i}`]?'checked':''}><span>${escText(item)}</span></label><button class="btn btn-secondary btn-small" data-action="verify-milestone" data-milestone="${project.id}-${i}" data-title="${escText(item)}">Verify evidence</button></div>${state.milestoneVerifications?.[`${project.id}-${i}`]?`<div class="field-help">Evidence review: ${state.milestoneVerifications[`${project.id}-${i}`].score}/100 · ${state.milestoneVerifications[`${project.id}-${i}`].passed?'Passed':'Needs more evidence'}</div>`:''}`).join('')}<div class="callout" style="margin-top:11px"><p><strong>Why it proves readiness:</strong> ${escText(project.proof)}</p></div></article>`}).join('')}</div>`;
+    }
+    const QUESTIONS=[
+      {type:'Behavioral · transition story',q:'Tell me about a time you used evidence to improve a process or customer outcome. What did you notice, what did you do, and what changed?'},
+      {type:'Product analytics · structure',q:'A new-user activation metric dropped 12% this week. How would you investigate whether the change is real and where it is coming from?'},
+      {type:'Experimentation · trade-offs',q:'A product team wants to ship a change because early results look positive. What would you check before recommending a rollout?'},
+      {type:'Communication · impact',q:'Describe how you would explain an uncertain or counterintuitive analysis to a stakeholder who needs to make a decision today.'}
+    ];
+    function renderInterview(){
+      const q=state.interviewQuestion||QUESTIONS[interviewIndex%QUESTIONS.length],last=state.interviews[0],focus=last?.feedback?.focus,questionText=q.question||q.q,questionType=q.source_note||q.type||'Original practice prompt';
+      return `${pageHead('Step 5 · Practice with purpose','A better answer, one rep at a time.','Answer in your own words. You’ll get an instant directional score across a visible rubric, plus a focused follow-up.',`<button class="btn btn-secondary" data-action="new-question">↻ New question</button>`)}
+        <div class="grid grid-2">
+          <section class="card card-pad"><div class="question-card"><div class="eyebrow">${escText(questionType)}</div><p>${escText(questionText)}</p></div>
+            <div style="margin-top:15px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><label class="field-label" for="answer" style="margin:0">Your answer</label><button class="btn btn-secondary btn-small" data-action="voice" id="voice-button">◉ ${recognition?'Listening…':'Use voice'}</button></div><textarea class="textarea answer-box" id="answer" placeholder="Try a short STAR story or talk through your reasoning step by step..."></textarea><div class="field-help">Voice input uses your browser's speech recognition when available. Text always works as a fallback.</div><button class="btn btn-primary" data-action="score-answer" style="margin-top:12px">Score my answer →</button></div>
+          </section>
+          <section class="card card-pad"><div class="section-heading" style="margin:0 0 14px"><div><h2 class="card-title">Your evaluation rubric</h2><p>Each dimension is scored from 0 to 25.</p></div><span class="tag tag-neutral">100 points</span></div>
+            <div class="rubric">${[['Technical accuracy','◈'],['Problem-solving / structure','↗'],['Role relevance','◎'],['Clarity / impact','✦']].map(([name,icon])=>`<div class="rubric-item"><span>${icon} ${name}</span><strong>${last?last.rubric[name]: '—'}<small style="font-size:9px;color:#9aa39b;font-weight:500">${last?'/25':''}</small></strong></div>`).join('')}</div>
+            <div class="divider"></div><div id="interview-feedback" class="interview-result ${last?'visible':''}">${last?`<div style="display:flex;gap:15px;align-items:center"><div class="score-ring">${last.score}</div><div><div class="eyebrow">Last practice · ${new Date(last.date).toLocaleDateString()}</div><h3 class="card-title" style="margin:6px 0">${escText(last.feedback.headline)}</h3><p class="card-note">${escText(last.feedback.text)}</p></div></div><div class="callout" style="margin-top:14px"><span>→</span><p><strong>Try this next:</strong> ${escText(last.feedback.followUp)}</p></div><div class="field-help" style="margin-top:10px">This lightweight practice score is based on answer signals and is not a hiring assessment.</div>`:`<div class="empty">Your rubric scores, coaching note, and follow-up question will appear here after you respond.</div>`}</div>
+            ${focus?`<div class="callout" style="margin-top:13px"><p><strong>Practice focus from your last run:</strong> ${escText(focus)}. Your learning plan is ready to reinforce it.</p></div>`:''}
+          </section>
+        </div>
+        <div class="section-heading"><div><h2>Practice history</h2><p>Your recent scores stay on this device.</p></div></div>
+        <section class="card card-pad">${state.interviews.length?state.interviews.slice(0,5).map((run,i)=>`<div class="list-row"><div class="row-icon">${run.score}</div><div class="row-main"><strong>${escText(run.questionType)}</strong><span>${new Date(run.date).toLocaleDateString()} · Focus: ${escText(run.feedback.focus)}</span></div><span class="tag ${run.score>=70?'tag-match':'tag-partial'}">${run.score}/100</span></div>`).join(''):'<div class="empty">No practice reps yet. Pick any question and give it a try.</div>'}</section>`;
+    }
+    function getApplicationInsight(){
+      const apps=state.apps||[],responded=apps.filter(a=>['Interview','Offer','Rejected'].includes(a.status));
+      if(state.applicationAnalysis?.by_role_type&&Object.keys(state.applicationAnalysis.by_role_type).length){
+        const analysis=state.applicationAnalysis,rows=Object.entries(analysis.by_role_type).sort((a,b)=>b[1]-a[1]),winner=rows[0];
+        return{summary:`${Math.round(analysis.response_rate)}% response rate across ${analysis.total} tracked applications.`,bars:rows.map(([name,value])=>`<div class="chart-row"><span class="chart-label" title="${escText(name)}">${escText(name)}</span><div class="chart-track"><i style="width:${Math.min(100,Math.max(0,value))}%"></i></div><span class="chart-value">${Math.round(value)}%</span></div>`).join(''),recommendation:analysis.recommendations?.[0]||(winner?`Your strongest tracked role focus is ${winner[0]} at ${Math.round(winner[1])}%. Small samples are directional.`:'Add more outcomes to see a pattern.')};
+      }
+      const rate=percent(responded.length,apps.length),groups={};
+      apps.forEach(a=>{const key=a.type||'Other';groups[key]??={total:0,responses:0};groups[key].total++;if(['Interview','Offer','Rejected'].includes(a.status))groups[key].responses++;});
+      const rows=Object.entries(groups).sort((a,b)=>percent(b[1].responses,b[1].total)-percent(a[1].responses,a[1].total));
+      const winner=rows.find(x=>x[1].total>=2)||rows[0];
+      return {summary:`${rate}% response rate across ${apps.length} tracked ${apps.length===1?'application':'applications'}.`,bars:rows.map(([name,data])=>`<div class="chart-row"><span class="chart-label" title="${escText(name)}">${escText(name)}</span><div class="chart-track"><i style="width:${percent(data.responses,data.total)}%"></i></div><span class="chart-value">${percent(data.responses,data.total)}% <small style="font-weight:500;color:#959d96">(${data.responses}/${data.total})</small></span></div>`).join(''),recommendation:winner?`Your strongest signal so far is <strong>${escText(winner[0])}</strong> roles (${percent(winner[1].responses,winner[1].total)}% responses). Keep tracking outcomes; small samples are directional, not a guarantee.`:''};
+    }
+    function renderApplications(){
+      const insight=getApplicationInsight(),apps=state.apps||[];
+      return `${pageHead('Step 6 · Learn from the market','Every application is a signal.','Track role type, level, tailoring, and outcomes. Compare the response patterns to focus your next round of applications.',`<button class="btn btn-primary" data-action="add-application">＋ Log application</button>`)}
+        <div class="grid grid-3">${metric('Applications',apps.length,'Roles you are actively tracking','▣')}${metric('Response rate',`${percent(apps.filter(a=>['Interview','Offer','Rejected'].includes(a.status)).length,apps.length)}%`,'Interview, offer, or rejection received','↗')}${metric('Interview / offer',apps.filter(a=>['Interview','Offer'].includes(a.status)).length,`${apps.filter(a=>a.status==='Interview').length} interviews · ${apps.filter(a=>a.status==='Offer').length} offers`,'◎')}</div>
+        <div class="grid grid-2" style="margin-top:15px"><section class="card card-pad"><div class="section-heading" style="margin:0 0 11px"><div><h2 class="card-title">Response rate by role focus</h2><p>Response = interview, offer, or rejection.</p></div><span class="tag tag-neutral">Live</span></div>${insight.bars||'<div class="empty">Log roles to see patterns by role type.</div>'}</section>
+          <section class="card card-pad"><div class="eyebrow">Your next experiment</div><h2 class="card-title" style="margin:8px 0 5px">Make the data more useful</h2><p class="card-note">${insight.recommendation||'Track a few roles with different focus areas and approaches. More observations make your comparisons more informative.'}</p><div class="divider"></div><p class="field-help">A “response” currently means any clear employer outcome: interview, offer, or rejection. “No response” remains pending.</p></section></div>
+        <div class="section-heading"><div><h2>Your application pipeline</h2><p>Update status inline; changes are saved automatically.</p></div><span class="tag tag-neutral">${apps.length} tracked</span></div>
+        <section class="card card-pad" style="padding:8px 14px"><div style="overflow-x:auto"><table class="application-table"><thead><tr><th>Company / role</th><th>Role focus</th><th>Approach</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody>${apps.length?apps.map(app=>`<tr><td class="company-cell"><strong>${escText(app.company)}</strong><span>${escText(app.role)} · ${escText(app.seniority)}</span></td><td>${escText(app.type)}</td><td><span class="tag tag-neutral">${escText(app.approach)}</span></td><td><select class="status-select" data-action="app-status" data-app="${escText(app.id)}" data-value="${escText(app.status)}" aria-label="Application status">${['Applied','No response','Interview','Offer','Rejected'].map(x=>`<option ${app.status===x?'selected':''}>${x}</option>`).join('')}</select></td><td style="max-width:170px;color:#77827a">${escText(app.notes||'—')}</td><td><button class="btn btn-danger btn-small" data-action="delete-app" data-app="${escText(app.id)}" aria-label="Delete application">×</button></td></tr>`).join(''):`<tr><td colspan="6"><div class="empty">No applications tracked yet. Add one to start learning from your search.</div></td></tr>`}</tbody></table></div></section>`;
+    }
+    function showSkillDetail(name){
+      const skill=getSkillMap().find(s=>s.name===name);if(!skill)return;
+      const evidence=extractFound(state.resume).includes(name)?`We found “${name}” in your resume/background. Consider adding a specific example, scope, or outcome.`:`We didn't find “${name}” in your resume yet. If you've used it, add concrete evidence to your profile; otherwise, use the roadmap and project lab to build proof.`;
+      const suggestion=skill.status==='matched'?`Strengthen the evidence: “Used ${name} to [specific task], enabling [decision or outcome].” Replace brackets only with details you can verify.`:`Bullet starter: “Applied ${name} to [specific problem] using [method/tool], then shared [finding or deliverable] with [audience].” Keep it truthful; a practice project is valid evidence when labeled as a project.`;
+      document.getElementById('modal-root').innerHTML=`<div class="modal-backdrop open" data-action="close-modal"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-head"><div><div class="eyebrow">Requirement detail</div><h2 id="modal-title" style="margin-top:5px">${escText(skill.name)}</h2></div><button class="close-btn" data-action="close-modal" aria-label="Close">×</button></div>${statusTag(skill.status)}<p class="card-note" style="margin:13px 0"><strong>Why the job asks for it:</strong> ${escText(skill.why)}</p><div class="callout"><p>${escText(evidence)}</p></div><div class="divider"></div><div class="eyebrow">Bullet / evidence idea</div><p class="card-note" style="margin-top:8px">${escText(suggestion)}</p><div class="toolbar" style="margin-top:18px"><button class="btn btn-primary btn-small" data-nav="roadmap">Build this skill</button><button class="btn btn-secondary btn-small" data-action="close-modal">Done</button></div></section></div>`;
+    }
+    function showMilestoneVerification(id,title){
+      document.getElementById('modal-root').innerHTML=`<div class="modal-backdrop open" data-action="close-modal"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-head"><div><div class="eyebrow">Evidence check · ${escText(state.target)}</div><h2 id="modal-title" style="margin-top:5px">Verify your work</h2></div><button class="close-btn" data-action="close-modal" aria-label="Close">×</button></div><p class="card-note" style="margin-bottom:13px"><strong>${escText(title)}</strong><br>Answer with what you actually built. This checks explanation and evidence, not just a checkbox.</p><form id="milestone-verify-form"><input type="hidden" name="milestone_id" value="${escText(id)}"><input type="hidden" name="milestone_title" value="${escText(title)}"><label class="field-label">What problem did your work solve?</label><textarea class="textarea" name="answer_1" required></textarea><label class="field-label" style="margin-top:9px">What method, tools, or trade-off did you use?</label><textarea class="textarea" name="answer_2" required></textarea><label class="field-label" style="margin-top:9px">What evidence or test supports the result?</label><textarea class="textarea" name="answer_3" required></textarea><button class="btn btn-primary" type="submit" style="margin-top:12px">Review my evidence</button></form></section></div>`;
+    }
+    function openApplicationModal(){
+      document.getElementById('modal-root').innerHTML=`<div class="modal-backdrop open" data-action="close-modal"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-head"><div><div class="eyebrow">Application tracker</div><h2 id="modal-title" style="margin-top:5px">Log a role</h2></div><button class="close-btn" data-action="close-modal" aria-label="Close">×</button></div><form id="application-form"><div class="form-grid"><div class="form-field"><label class="field-label">Company</label><input class="field" name="company" required placeholder="e.g. Northstar"></div><div class="form-field"><label class="field-label">Role title</label><input class="field" name="role" required value="${escText(state.target)}"></div><div class="form-field"><label class="field-label">Role focus</label><select class="select" name="type"><option>Product analytics</option><option>BI / reporting</option><option>Customer insights</option><option>Data science</option><option>Operations analytics</option><option>Other</option></select></div><div class="form-field"><label class="field-label">Seniority</label><select class="select" name="seniority"><option>Associate</option><option selected>Mid-level</option><option>Senior</option><option>Lead</option></select></div><div class="form-field"><label class="field-label">Application approach</label><select class="select" name="approach"><option>Tailored</option><option>Quick apply</option><option>Referral</option><option>Recruiter</option></select></div><div class="form-field"><label class="field-label">Current status</label><select class="select" name="status"><option>Applied</option><option>No response</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></div><div class="form-field full"><label class="field-label">Notes</label><input class="field" name="notes" placeholder="Tailoring choices, follow-up, or what you learned"></div><div class="form-field full"><button class="btn btn-primary" type="submit">Save application</button></div></div></form></section></div>`;
+    }
+    function showRoadblockModal(){
+      document.getElementById('modal-root').innerHTML=`<div class="modal-backdrop open" data-action="close-modal"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-head"><div><div class="eyebrow">Adapt your plan</div><h2 id="modal-title" style="margin-top:5px">What's slowing you down?</h2></div><button class="close-btn" data-action="close-modal" aria-label="Close">×</button></div><p class="card-note" style="margin-bottom:14px">Log a constraint or topic that needs more time. We'll keep completed work and put the most relevant unfinished steps first.</p><form id="roadblock-form"><label class="field-label" for="roadblock">Roadblock or pace note</label><textarea class="textarea" id="roadblock" name="note" placeholder="e.g. I have less time this week; SQL joins need another practice session." required>${escText(state.paceNote)}</textarea><button class="btn btn-primary" style="margin-top:13px" type="submit">Save note & adapt plan</button></form></section></div>`;
+    }
+    async function scoreAnswer(){
+      const answer=document.getElementById('answer')?.value.trim();if(!answer){toast('Add a few sentences first so there is something to score.');return;}
+      const q=state.interviewQuestion||QUESTIONS[interviewIndex%QUESTIONS.length],question=q.question||q.q,weakSkills=getSkillMap().filter(item=>item.status!=='matched').slice(0,5).map(item=>item.name);
+      try{
+        const score=await apiRequest('/api/v1/interviews/score',{method:'POST',body:JSON.stringify({target_role:state.target||'Career pivot',weak_skills:weakSkills,answer,question})});
+        const rubric={'Technical accuracy':score.technical_accuracy,'Problem-solving / structure':score.structure,'Role relevance':score.depth,'Clarity / impact':score.clarity};
+        const lowest=Object.entries(rubric).sort((a,b)=>a[1]-b[1])[0][0];
+        const focus=score.weak_topics?.[0]||lowest.toLowerCase();
+        const feedback={headline:score.total>=80?'Strong foundation to build on':score.total>=60?'Good start—add one more proof point':'A useful first rep; make the story more concrete',text:score.correction,followUp:score.follow_up,focus};
+        state.interviews.unshift({date:new Date().toISOString(),questionType:q.source_note||q.type||'Original practice prompt',score:score.total,rubric,feedback,answer,aiGenerated:score.ai_generated});state.interviews=state.interviews.slice(0,20);state.interviewQuestion=null;state.adaptInterviewFocus=focus;state.adaptSkill=getSkillMap().find(item=>item.name.toLowerCase()===focus.toLowerCase())?.name||getSkillMap().find(item=>item.status!=='matched')?.name||'portfolio evidence';save();render();toast(`Practice saved · ${score.total}/100. Focus next on ${focus}.`);if(state.plannerResult)void buildPlan(!!state.plannerResult.priority_mode,true);return;
+      }catch(error){console.info('Interview scoring API unavailable; using local rubric:',error.message);}
+      const words=answer.toLowerCase().match(/[a-z0-9+#'-]+/g)||[],count=words.length,hasStructure=/\b(first|then|because|so that|result|outcome|finally|situation|task|action|impact|measured|approach|i would|next)\b/.test(answer.toLowerCase()),hasEvidence=/\b(\d+%?|\d+x|reduced|increased|improved|saved|launched|built|created|analyzed|identified|partnered|SQL|Python|experiment|metric|data)\b/i.test(answer),hasRole=/\b(product|customer|user|stakeholder|retention|activation|analysis|data|experiment|decision|team)\b/i.test(answer);
+      const accuracy=Math.min(25,Math.max(7,11+(hasEvidence?7:0)+(count>55?4:0)+(count>110?3:0)));
+      const structure=Math.min(25,Math.max(6,9+(hasStructure?8:0)+(count>45?4:0)+(count>90?4:0)));
+      const relevance=Math.min(25,Math.max(7,10+(hasRole?9:0)+(hasEvidence?3:0)+(state.target?2:0)));
+      const clarity=Math.min(25,Math.max(6,18+(count>=45&&count<=180?5:count<20?-8:count>240?-5:0)+(hasStructure?2:0)));
+      const rubric={'Technical accuracy':accuracy,'Problem-solving / structure':structure,'Role relevance':relevance,'Clarity / impact':clarity},score=accuracy+structure+relevance+clarity,lowest=Object.entries(rubric).sort((a,b)=>a[1]-b[1])[0][0];
+      let focus=lowest==='Technical accuracy'?'name the method, metric, and one limitation':lowest==='Problem-solving / structure'?'walk through your reasoning in a clear sequence':lowest==='Role relevance'?'connect the example to a product or customer decision':'make the outcome more specific and concise';
+      const feedback={headline:score>=80?'Strong foundation to build on':score>=60?'Good start—add one more proof point':'A useful first rep; make the story more concrete',text:`Your answer includes ${count} words${hasEvidence?' and a method or outcome signal':''}${hasRole?' with role-relevant context':''}. This directional score rewards detail, structure, and connection to the target role.`,followUp:`What would you measure to confirm that ${hasRole?'this change helped the user or business':'your approach worked'}?`,focus};
+      state.interviews.unshift({date:new Date().toISOString(),questionType:q.source_note||q.type||'Original practice prompt',score,rubric,feedback,answer,aiGenerated:false});state.interviews=state.interviews.slice(0,20);state.interviewQuestion=null;state.adaptInterviewFocus=focus;state.adaptSkill=getSkillMap().find(item=>item.name.toLowerCase()===focus.toLowerCase())?.name||getSkillMap().find(item=>item.status!=='matched')?.name||'portfolio evidence';save();render();toast(`Practice saved · ${score}/100. Focus next on ${focus}.`);if(state.plannerResult)void buildPlan(!!state.plannerResult.priority_mode,true);
+    }
+    async function loadInterviewQuestion(){
+      const weakSkills=getSkillMap().filter(item=>item.status!=='matched').slice(0,5).map(item=>item.name);
+      const result=await apiOrDemo('/api/v1/interviews/question',{target_role:state.target||'Career pivot',weak_skills:weakSkills,answer:'',question:''},()=>{interviewIndex=(interviewIndex+1)%QUESTIONS.length;const q=QUESTIONS[interviewIndex];return{question:q.q,source_note:q.type};});
+      state.interviewQuestion=result.data;save();render();toast(result.source==='api'?'Original role-focused question ready.':'Demo practice question ready.');
+    }
+    function adaptPlan(){
+      state.adapted=true;
+      const stats=getStats(),focus=stats.map.find(x=>x.status==='missing')?.name||stats.map.find(x=>x.status==='partial')?.name||'portfolio evidence';
+      state.adaptSkill=focus;
+      state.adaptInterviewFocus=state.interviews[0]?.feedback?.focus||'';
+      if(state.adaptInterviewFocus)state.paceNote=`Interview practice: ${state.adaptInterviewFocus}`;
+      save();void buildPlan(!!state.plannerResult?.priority_mode,true);
+    }
+    function loadSample(){
+      state.name='Alex Morgan';state.target='Product Data Analyst';state.resume=SAMPLE_RESUME;state.jd=SAMPLE_JD;
+      state.skillAnalysis=null;state.marketValue=null;state.quizHistory=[];state.quizScores={};state.quizQuestion=null;state.quizDone=false;save();render();void refreshSkillAnalysis(true);toast('Sample resume and realistic target job description loaded.');
+    }
+    function exportProfileText(){return `Target role: ${state.target}\n\nRESUME / BACKGROUND\n${state.resume}\n\nTARGET JOB DESCRIPTION(S)\n${state.jd}`;}
+    function intakePayload(){
+      return{name:state.name||'Career pivot',target_role:state.target||'Product Data Analyst',location:state.location||'United States',start_date:state.startDate||null,target_date:state.targetDate||null,daily_study_hours:Number(state.studyHours)||1,resume_text:state.resume||'',job_descriptions:(state.jd||'').split(/\n\s*---+\s*\n/).map(x=>x.trim()).filter(Boolean).slice(0,5)};
+    }
+    function fallbackSkillAnalysis(){
+      return{target_role:state.target,ai_generated:false,summary:'Local comparison of resume keywords and pasted job requirements.',skills:getSkillMap().map(item=>({skill:item.name,frequency:1,status:item.status==='matched'?'verified_strong':item.status==='partial'?'needs_depth':'missing',evidence:item.evidence||'',why_it_matters:item.why,quiz_score:state.quizScores[item.name]??null}))};
+    }
+    async function refreshSkillAnalysis(quiet=false){
+      const payload=intakePayload();
+      if(!payload.job_descriptions.length){state.skillAnalysis=null;save();if(!quiet)toast('Add at least one job description to analyze role requirements.');return;}
+      state.skillAnalysis=null;
+      const result=await apiOrDemo('/api/v1/skills/analyze',payload,()=>fallbackSkillAnalysis());
+      state.skillAnalysis=result.data;save();render();
+      if(!quiet)toast(result.source==='api'?'Skills compared against your resume and job descriptions.':'API unavailable; local resume-to-JD comparison updated.');
+    }
+    function plannerSkillEvidence(){
+      const priority=state.adaptSkill||state.interviews[0]?.feedback?.focus;
+      return getSkillMap().map(item=>({skill:item.name,frequency:item.name===priority?5:1,status:item.status==='matched'?'verified_strong':item.status==='partial'?'needs_depth':'missing',evidence:item.evidence||'',why_it_matters:item.why,quiz_score:item.quizScore}));
+    }
+    function fallbackPlan(priorityMode=false){
+      const gaps=getSkillMap().filter(item=>item.status!=='matched');
+      const skills=gaps.length?gaps.map(item=>item.name):['SQL','Product analytics','Portfolio storytelling'];
+      const amount=priorityMode?Math.max(4,Math.ceil(skills.length*1.5)):Math.max(8,skills.length*3);
+      const tasks=Array.from({length:amount},(_,i)=>({id:`demo-plan-${i+1}`,week:Math.floor(i/3)+1,day:(i%3)*2+1,title:`${skills[i%skills.length]}: ${['learn the fundamentals','practice on a realistic example','publish a reviewable proof point'][i%3]}`,skill:skills[i%skills.length],estimated_hours:priorityMode?1:2,prerequisites:i%3===0?[]:[`demo-plan-${i}`],completed:!!state.completed[`demo-plan-${i+1}`]}));
+      const estimate=tasks.reduce((sum,task)=>sum+task.estimated_hours,0),days=state.targetDate?Math.max(1,Math.ceil((new Date(`${state.targetDate}T23:59:59`)-new Date())/86400000)):84,available=Number(state.studyHours||1)*days;
+      return{tasks,target_days:days,available_hours:available,estimated_hours_needed:estimate,feasible:available>=estimate,required_daily_hours:estimate/days,warning:available<estimate?'Your current time budget is shorter than this demo plan estimate. Consider 80/20 priority mode or a later end date.':null,priority_mode:priorityMode,rescheduled_task_ids:[]};
+    }
+    async function buildPlan(priorityMode=false,reschedule=false){
+      const dateInput=document.getElementById('plan-target-date'),hoursInput=document.getElementById('plan-hours');
+      if(dateInput)state.targetDate=dateInput.value;
+      if(hoursInput)state.studyHours=Math.min(16,Math.max(.25,Number(hoursInput.value)||1));
+      save();
+      const payload={target_role:state.target||'Career pivot',target_date:state.targetDate||null,daily_study_hours:Number(state.studyHours)||1,skills:plannerSkillEvidence(),completed_task_ids:Object.keys(state.completed).filter(key=>state.completed[key]),priority_mode:priorityMode};
+      const path=reschedule?'/api/v1/planner/reschedule':'/api/v1/planner/generate';
+      const result=await apiOrDemo(path,payload,()=>fallbackPlan(priorityMode));
+      state.plannerResult=result.data;
+      state.plannerResult.source=result.source;
+      save();render();toast(result.source==='api'?'Your schedule was recalculated against your time budget.':'Demo schedule recalculated; start the API for date-feasible recommendations.');
+    }
+    function updateQuizScores(){
+      const grouped={};for(const item of state.quizHistory){(grouped[item.skill]??=[]).push(item.correct?100:0);}
+      state.quizScores=Object.fromEntries(Object.entries(grouped).map(([skill,scores])=>[skill,Math.round(scores.reduce((a,b)=>a+b,0)/scores.length)]));
+    }
+    async function startDiagnostic(){
+      state.quizHistory=[];state.quizScores={};state.quizDone=false;
+      try{state.quizQuestion=await apiRequest(`/api/v1/diagnostic/question?target_role=${encodeURIComponent(state.target||'Product Data Analyst')}`,{method:'POST'});}
+      catch(error){console.info('Using the local diagnostic question bank:',error.message);state.quizQuestion=localNextQuestion();}
+      save();render();
+    }
+    async function submitDiagnostic(form){
+      const selected=Number(new FormData(form).get('answer')),question=state.quizQuestion,index=quizProgress();
+      if(!question||!Number.isInteger(selected)){toast('Choose an answer before continuing.');return;}
+      let result;
+      if(String(question.id).startsWith('demo-')){
+        const demo=DEMO_DIAGNOSTIC[index%DEMO_DIAGNOSTIC.length],correct=selected===demo.answer,history=[...state.quizHistory,{skill:demo.skill,correct}];
+        result={correct,correct_index:demo.answer,explanation:demo.why,score:Math.round(history.filter(x=>x.correct).length/history.length*100),completed:history.length>=12,next_question:history.length<12?localNextQuestion():null};
+      }else{
+        const history=state.quizHistory.map(item=>({correct:item.correct,skill:item.skill}));
+        try{result=await apiRequest('/api/v1/diagnostic/answer',{method:'POST',body:JSON.stringify({target_role:state.target||'Product Data Analyst',question_index:index,question_id:question.id,selected_index:selected,history})});}
+        catch(error){console.warn('Diagnostic API answer failed; using the local practice score.',error);const demo=DEMO_DIAGNOSTIC[index%DEMO_DIAGNOSTIC.length],correct=selected===demo.answer;result={correct,correct_index:demo.answer,explanation:demo.why,score:Math.round((state.quizHistory.filter(x=>x.correct).length+(correct?1:0))/(index+1)*100),completed:index+1>=12,next_question:index+1<12?localNextQuestion():null};}
+      }
+      const skill=question.skill||DEMO_DIAGNOSTIC[index%DEMO_DIAGNOSTIC.length].skill;
+      state.quizHistory.push({skill,correct:result.correct});updateQuizScores();state.quizQuestion=result.next_question;state.quizDone=!!result.completed;
+      save();render();
+      toast(`${result.correct?'Correct.':'Good practice.'} ${result.explanation}`);
+      if(state.quizDone)void refreshSkillAnalysis(true);
+    }
+    async function refreshMarket(){
+      const body={target_role:state.target||'Career pivot',location:state.location||'United States',verified_skills:Object.keys(state.quizScores).filter(name=>state.quizScores[name]>=75),completed_projects:Object.values(state.milestones).filter(Boolean).length,interview_score:state.interviews[0]?.score||0};
+      const result=await apiOrDemo('/api/v1/market/estimate',body,()=>localMarketEstimate());
+      state.marketValue={...result.data,source:result.source==='api'?'Directional API estimate':'Synthetic estimate; API unavailable.'};save();render();toast('Market value estimate updated from your latest evidence.');
+    }
+    function demoScan(url){
+      let host='Public project';try{host=new URL(url).hostname;}catch{}
+      return{url,title:host,repository:/github\.com/i.test(url),demo:true,stack:[{layer:'Frontend',technologies:['Not fetched in demo'],evidence:'Configure FastAPI to inspect a public website or repository.'},{layer:'Architecture',technologies:['Public metadata only'],evidence:'No code executed.'}],concepts:['Dependency management','Request and data flow','Testing and error handling','Security boundaries'],learning_tasks:['Map one request from user action to data storage.'],limitations:['API unavailable; no URL was fetched.','This preview is not a security audit.']};
+    }
+    async function scanProject(form){
+      const url=String(new FormData(form).get('url')||'').trim();
+      const result=await apiOrDemo('/api/v1/scanner/analyze',{url},()=>demoScan(url));
+      state.scanResult={...result.data,demo:result.source==='demo'};state.learningTasks=(result.data.learning_tasks||[]).map((title,index)=>({id:`scan-${index}`,title,source:'Project reverse engineer',estimated_hours:1,done:false}));save();render();
+      toast(result.source==='api'?'Public project metadata inspected.':'Showing a demo preview; the URL was not fetched.');
+    }
+    async function generateChallenge(form){
+      const fields=new FormData(form),body={target_role:state.target||'Career pivot',skill:String(fields.get('skill')),difficulty:String(fields.get('difficulty')),domain:'general'};
+      const result=await apiOrDemo('/api/v1/challenges/generate',body,()=>({challenge_id:`demo-${Date.now()}`,title:`${body.difficulty} ${body.skill} proof challenge`,skill:body.skill,difficulty:body.difficulty,scenario:`A team needs a practical ${body.skill} example for a ${body.target_role} decision.`,instructions:['State the problem and your assumptions.','Show your proposed work or reasoning.','Explain how you would validate the result and communicate limitations.'],time_limit_minutes:45,evaluation_criteria:['Accuracy','Reasoning','Practicality','Communication']}));
+      state.challenge=result.data;state.challenge.demo=result.source==='demo';save();render();
+      if(state.challenge.demo)toast('Challenge generated in demo mode; evaluation will use a transparent heuristic.');
+    }
+    async function evaluateChallenge(form){
+      const data=new FormData(form),body={challenge_id:String(data.get('challenge_id')),title:state.challenge.title,skill:state.challenge.skill,difficulty:state.challenge.difficulty,instructions:state.challenge.instructions.join('\n'),submission:String(data.get('submission')||'')};
+      const result=await apiOrDemo('/api/v1/challenges/evaluate',body,()=>{
+        const words=body.submission.trim().split(/\s+/).filter(Boolean).length,evidence=(body.submission.match(/\b(test|metric|because|assumption|validate|trade.?off|example)\b/gi)||[]).length,score=Math.max(15,Math.min(95,Math.round(25+Math.min(words,100)*.35+evidence*4)));
+        return{record_id:`demo-${Date.now()}`,score,criteria:{accuracy:Math.round(score*.25),reasoning:Math.round(score*.25),practicality:Math.round(score*.25),communication:Math.round(score*.25)},strengths:words>=30?['Submission includes a developed explanation.']:['You made a start; add more concrete reasoning.'],improvements:evidence<2?['Include assumptions, validation, or a specific example.']:['Explain one limitation or next validation step.'],feedback:'Demo coaching signal only; the heuristic evaluates response detail, not correctness.',next_challenge:`Extend your ${body.skill} example with a measurable validation step.`,submitted_at:new Date().toISOString(),ai_generated:false};
+      });
+      state.challengeResults.unshift({...result.data,demo:result.source==='demo'});save();render();toast(result.source==='api'?'Your submission has been evaluated.':'Demo assessment saved; configure the API for model-assisted feedback.');
+    }
+    async function generateProjects(){
+      const body={target_role:state.target||'Career pivot',background:state.resume||'',gaps:getSkillMap().filter(item=>item.status!=='matched').map(item=>item.name)};
+      const result=await apiOrDemo('/api/v1/portfolio/projects',body,()=>({projects:makeProjects().slice(0,2).map(item=>({title:item.name,problem:item.scope,bridge:'Connect your current experience to target-role evidence.',tech_stack:item.skills,milestones:item.deliverables,interview_proof:item.proof})),ai_generated:false}));
+      state.generatedProjects=result.data.projects||[];save();render();toast(result.source==='api'?'Projects generated from your current gaps.':'Demo projects mapped to your current skill gaps.');
+    }
+    async function draftBullets(form){
+      const fields=new FormData(form),body={milestone_title:String(fields.get('milestone_title')),target_role:state.target||'Career pivot',evidence:String(fields.get('evidence'))};
+      const result=await apiOrDemo('/api/v1/portfolio/resume/bullets',body,()=>({bullets:[`Completed ${body.milestone_title} for ${body.target_role}, demonstrating ${body.evidence.slice(0,220)||'[describe verified work and outcome]'}.`],ai_generated:false}));
+      state.pendingBullets=[...(state.pendingBullets||[]),...result.data.bullets];save();render();toast('Review each proposed bullet; nothing is added to your resume until you approve it.');
+    }
+    async function verifyMilestone(form){
+      const data=new FormData(form),id=String(data.get('milestone_id')),title=String(data.get('milestone_title')),answers=[1,2,3].map(i=>String(data.get(`answer_${i}`)||''));
+      const result=await apiOrDemo('/api/v1/portfolio/verify',{milestone_title:title,answers},()=>{const specificity=answers.filter(text=>/\b(why|because|trade.?off|test|result|metric|example|method|decision)\b/i.test(text)).length,nonempty=answers.filter(text=>text.trim()).length,score=Math.round(specificity/3*60+nonempty/3*40);return{passed:score>=65,score,feedback:[score>=65?'Answers include concrete evidence and validation.':'Add a specific method, example, or validation result before treating this milestone as verified.']};});
+      state.milestoneVerifications[id]={...result.data,source:result.source};if(result.data.passed)state.milestones[id]=true;
+      save();document.getElementById('modal-root').innerHTML='';render();toast(result.data.passed?'Milestone evidence verified and saved.':'Evidence needs more detail; the milestone remains unverified.');
+    }
+    async function loadUnlockedRoles(){
+      const query=new URLSearchParams({target_role:state.target||'Career pivot',verified_skills:Object.keys(state.quizScores).filter(name=>state.quizScores[name]>=75).join(',')});
+      try{const response=await apiRequest(`/api/v1/portfolio/roles?${query}`);state.unlockedRoles=response.roles||[];}
+      catch(error){console.info('Using the directional local role match:',error.message);state.unlockedRoles=[{title:state.target||'Target role',match:getStats().readiness,evidence:'Local resume and skill-map alignment.',requirements_to_check:['Compare against each employer’s full job description.']}];}
+      save();render();
+    }
+    async function generateWeeklyReport(){
+      const missing=getSkillMap().filter(item=>item.status==='missing').map(item=>item.name),completed=Object.values(state.completed).filter(Boolean).length;
+      const body={preferences:{target_role:state.target||'Career pivot',location:state.location||'Remote',remote_only:false,include_internships:true}};
+      const query=new URLSearchParams({completed_tasks:String(completed)});missing.forEach(skill=>query.append('missing_skills',skill));
+      const result=await apiOrDemo(`/api/v1/agent/weekly-report?${query}`,body,()=>({generated_at:new Date().toISOString(),opportunities:[{title:`Entry-level ${state.target}`,location:state.location,match:getStats().readiness,source:'Demo recommendation; no live vacancies fetched.',missing_qualifications:missing}],reminders:state.apps.filter(app=>app.status==='Applied'||app.status==='No response').map(app=>`Review follow-up timing for ${app.company} — ${app.role}.`),progress_summary:`${completed} learning tasks completed; ${missing.length} priority skills remain.`,portfolio_suggestions:missing.slice(0,3).map(skill=>`Build a reviewable ${skill} example and document your decisions.`),weekly_focus:missing.slice(0,3),pending_approvals:[],ai_generated:false}));
+      state.careerReport=result.data;save();render();toast(result.source==='api'?'Your on-demand career report is ready.':'Demo report ready; no jobs were searched and no actions were taken.');
+    }
+    async function analyzeApplications(){
+      const records=(state.apps||[]).map(app=>({role_title:app.role,role_type:app.type||'',company:app.company,company_size:'',company_type:'',work_mode:'unspecified',required_stack:[],resume_version:app.approach||'',status:({'Applied':'applied','No response':'ghosted','Interview':'interview','Offer':'offer','Rejected':'rejected'}[app.status]||'applied'),notes:app.notes||''}));
+      if(!records.length){state.applicationAnalysis=null;return;}
+      try{state.applicationAnalysis=await apiRequest('/api/v1/applications/analyze',{method:'POST',body:JSON.stringify(records)});save();if(['applications','overview'].includes(currentPage))render();}
+      catch(error){console.info('Application analytics are using the local tracker:',error.message);state.applicationAnalysis=null;if(['applications','overview'].includes(currentPage))render();}
+    }
+    function startPrintResume(){save();window.print();}
+    document.addEventListener('click',event=>{
+      const navBtn=event.target.closest('[data-nav]');if(navBtn){nav(navBtn.dataset.nav);document.getElementById('modal-root').innerHTML='';return;}
+      const pageBtn=event.target.closest('[data-page]');if(pageBtn){nav(pageBtn.dataset.page);return;}
+      const button=event.target.closest('[data-action]');if(!button)return;
+      const action=button.dataset.action;
+      if(action==='sample')loadSample();
+      else if(action==='theme'){state.theme=state.theme==='dark'?'light':'dark';save();render();}
+      else if(action==='skill-filter'){skillFilter=button.dataset.filter;render();}
+      else if(action==='skill-detail')showSkillDetail(button.dataset.skill);
+      else if(action==='close-modal'){if(event.target===button||button.classList.contains('close-btn'))document.getElementById('modal-root').innerHTML='';}
+      else if(action==='add-application')openApplicationModal();
+      else if(action==='delete-app'){state.apps=state.apps.filter(a=>a.id!==button.dataset.app);save();render();toast('Application removed.');}
+      else if(action==='adapt')adaptPlan();
+      else if(action==='quiz-start')void startDiagnostic();
+      else if(action==='quiz-restart')void startDiagnostic();
+      else if(action==='calculate-plan')void buildPlan(false,false);
+      else if(action==='priority-plan')void buildPlan(true,false);
+      else if(action==='reschedule-plan')void buildPlan(!!state.plannerResult?.priority_mode,true);
+      else if(action==='refresh-market')void refreshMarket();
+      else if(action==='inject-concepts')void (async()=>{try{const result=await apiRequest('/api/v1/scanner/inject-learning-plan',{method:'POST',body:JSON.stringify(state.scanResult?.concepts||[])});state.learningTasks=[...(state.learningTasks||[]),...result.tasks_added.map((title,index)=>({id:`concept-${Date.now()}-${index}`,title,source:'Vibe scanner',estimated_hours:1,done:false}))];save();render();toast(`${result.tasks_added.length} concepts added to your plan.`);}catch(error){state.learningTasks=[...(state.learningTasks||[]),...(state.scanResult?.learning_tasks||[]).map((title,index)=>({id:`concept-${Date.now()}-${index}`,title,source:'Vibe scanner · demo',estimated_hours:1,done:false}))];save();render();toast('API unavailable; demo scanner tasks added to your plan.');}})();
+      else if(action==='generate-projects')void generateProjects();
+      else if(action==='weekly-report')void generateWeeklyReport();
+      else if(action==='verify-milestone')showMilestoneVerification(button.dataset.milestone,button.dataset.title);
+      else if(action==='save-resume'){state.livingResumeText=document.getElementById('resume-editor')?.value||'';save();toast('Living resume saved on this device.');}
+      else if(action==='print-resume')startPrintResume();
+      else if(action==='save-achievement'){const result=state.challengeResults?.[0];if(result){state.milestones[`challenge-${result.record_id}`]=true;save();toast('Assessment added to your achievement record.');}}
+      else if(action==='save-bullet'){const index=Number(button.dataset.index);if(state.pendingBullets[index]){state.livingResume=[...(state.livingResume||[]),state.pendingBullets[index]];state.livingResumeText='';state.pendingBullets.splice(index,1);save();render();toast('Approved bullet added to your living resume.');}}
+      else if(action==='roadblock')showRoadblockModal();
+      else if(action==='new-question')void loadInterviewQuestion();
+      else if(action==='score-answer')scoreAnswer();
+      else if(action==='voice')toggleVoice();
+      else if(action==='complete-task'){state.completed[button.dataset.task]=true;save();render();toast('Task complete. Nice momentum.');}
+      else if(action==='auth-mode'){authMode=button.dataset.mode;authNotice='';render();}
+      else if(action==='signout'){void signOut();}
+      else if(action==='disconnect-project'){void disconnectProject();}
+      else if(action==='reset-password'){void sendPasswordReset();}
+      else if(action==='google-auth'){void startGoogleAuth();}
+    });
+    document.addEventListener('change',event=>{
+      const el=event.target;
+      if(el.id==='resume-file'&&el.files?.[0]){const file=el.files[0],formData=new FormData();formData.append('file',file);void (async()=>{try{const parsed=await apiRequest('/api/v1/intake/parse',{method:'POST',body:formData});state.resume=parsed.extracted_text||'';if(parsed.name&&!state.name)state.name=parsed.name;save();render();toast(`Resume parsed (${parsed.source}). Review the extracted text and save your profile.`);}catch(error){if(/\.(txt|md|csv)$/i.test(file.name)){const reader=new FileReader();reader.onload=()=>{state.resume=String(reader.result||'');save();render();toast('API unavailable; text resume loaded locally.');};reader.onerror=()=>toast('Could not read that file. Try pasting the resume text instead.');reader.readAsText(file);}else toast(`Resume parsing failed: ${error.message}`);}})();}
+      if(el.matches('[data-action="task-check"]')){state.completed[el.dataset.task]=el.checked;save();render();}
+      if(el.matches('[data-action="planner-task"]')){state.completed[el.dataset.task]=el.checked;save();render();}
+      if(el.matches('[data-action="custom-task"]')){const task=state.learningTasks[Number(el.dataset.index)];if(task){task.done=el.checked;save();render();}}
+      if(el.matches('[data-action="approve-bullet"]')){const index=Number(el.dataset.index);if(el.checked){state.livingResume=[...(state.livingResume||[]),state.pendingBullets[index]];state.livingResumeText='';state.pendingBullets.splice(index,1);save();render();toast('Approved bullet added to your living resume.');}}
+      if(el.matches('[data-action="milestone"]')){state.milestones[el.dataset.milestone]=el.checked;save();render();void refreshMarket();}
+      if(el.matches('[data-action="app-status"]')){const app=state.apps.find(a=>a.id===el.dataset.app);if(app){app.status=el.value;save();render();void analyzeApplications();toast('Application outcome updated.');}}
+    });
+    document.addEventListener('input',event=>{
+      if(!['resume','job-description','target-role'].includes(event.target.id))return;
+      if(event.target.id==='resume')state.resume=event.target.value;
+      if(event.target.id==='job-description')state.jd=event.target.value;
+      if(event.target.id==='target-role')state.target=event.target.value;
+      clearTimeout(saveTimer);saveTimer=setTimeout(save,250);
+      const preview=document.getElementById('profile-preview'),role=document.getElementById('role-preview'),requirements=document.getElementById('requirements-preview');
+      if(preview){const skills=extractFound(document.getElementById('resume').value);preview.innerHTML=skills.length?skills.map(x=>`<span class="tag tag-neutral">${escText(x)}</span>`).join(''):'<span class="card-note">No recognized skills yet.</span>';}
+      if(role)role.textContent=document.getElementById('target-role').value||'Add a target role to begin.';
+      if(requirements){const skills=extractFound(document.getElementById('job-description').value);requirements.textContent=skills.length?skills.join(' · '):'Paste a job description to identify requirements.';}
+    });
+    document.addEventListener('submit',async event=>{
+      event.preventDefault();const form=event.target;
+      if(form.id==='supabase-config-form'){
+        const data=new FormData(form),url=String(data.get('url')||'').trim().replace(/\/+$/,''),key=String(data.get('key')||'').trim(),problem=validateProjectConfig(url,key);
+        if(problem){authNotice=problem;authNoticeType='error';render();return;}
+        try{localStorage.setItem(SUPABASE_CONFIG_KEY,JSON.stringify({url,key}));supabaseConfig={url,key};authNotice='Connecting to your Supabase project…';authNoticeType='info';render();await initializeSupabase();}
+        catch(error){console.error('Supabase project configuration could not be saved.',error);authNotice='Could not save this project configuration in this browser.';authNoticeType='error';render();}
+        return;
+      }
+      if(form.id==='auth-form'){await submitAuth(form);return;}
+      if(form.id==='recovery-form'){await submitPasswordChange(form);return;}
+      if(form.id==='diagnostic-answer-form'){await submitDiagnostic(form);return;}
+      if(form.id==='scanner-form'){await scanProject(form);return;}
+      if(form.id==='challenge-create-form'){await generateChallenge(form);return;}
+      if(form.id==='challenge-submit-form'){await evaluateChallenge(form);return;}
+      if(form.id==='bullet-form'){await draftBullets(form);return;}
+      if(form.id==='milestone-verify-form'){await verifyMilestone(form);return;}
+      if(form.id==='profile-form'){const data=new FormData(form),startDate=String(data.get('start_date')||''),targetDate=String(data.get('target_date')||'');if(startDate&&targetDate&&targetDate<startDate){toast('Choose a target date on or after your plan start date.');return;}const previousTarget=state.target;state.name=String(data.get('name')||'Your profile').trim();state.target=String(data.get('target')||'').trim();state.resume=String(data.get('resume')||'').trim();state.jd=String(data.get('jd')||'').trim();state.location=String(data.get('location')||'United States').trim();state.studyHours=Math.min(16,Math.max(.25,Number(data.get('study_hours'))||1));state.startDate=startDate;state.targetDate=targetDate;state.skillAnalysis=null;state.marketValue=null;if(previousTarget!==state.target){state.quizHistory=[];state.quizScores={};state.quizQuestion=null;state.quizDone=false;}save();render();toast('Career profile saved. Updating the skill map…');await refreshSkillAnalysis(true);toast('Career profile saved and your role analysis updated.');}
+      if(form.id==='application-form'){const data=new FormData(form);state.apps.unshift({id:`a${Date.now()}`,company:String(data.get('company')).trim(),role:String(data.get('role')).trim(),type:String(data.get('type')),seniority:String(data.get('seniority')),status:String(data.get('status')),approach:String(data.get('approach')),notes:String(data.get('notes')).trim()});save();nav('applications');document.getElementById('modal-root').innerHTML='';void analyzeApplications();toast('Application added to your tracker.');}
+      if(form.id==='roadblock-form'){state.paceNote=String(new FormData(form).get('note')).trim();state.adapted=true;state.adaptInterviewFocus='';state.adaptSkill=getSkillMap().find(x=>x.status==='missing')?.name||getSkillMap().find(x=>x.status==='partial')?.name||'portfolio evidence';save();document.getElementById('modal-root').innerHTML='';await buildPlan(!!state.plannerResult?.priority_mode,true);toast('Roadblock saved. Upcoming plan adapted.');}
+    });
+    document.addEventListener('keydown',event=>{if(event.key==='Escape')document.getElementById('modal-root').innerHTML='';if(event.key==='Enter'&&event.target.matches('[data-action="skill-detail"]'))showSkillDetail(event.target.dataset.skill);});
+    function toggleVoice(){
+      const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(!SpeechRecognition){toast('Speech input is not available in this browser. You can type your answer instead.');return;}
+      if(recognition){recognition.stop();recognition=null;return;}
+      recognition=new SpeechRecognition();recognition.lang='en-US';recognition.continuous=true;recognition.interimResults=true;
+      const button=document.getElementById('voice-button');if(button)button.textContent='◉ Listening…';
+      recognition.onresult=event=>{const answer=document.getElementById('answer');if(answer){let transcript='';for(let i=0;i<event.results.length;i++)transcript+=event.results[i][0].transcript+' ';answer.value=transcript.trim();}};
+      recognition.onerror=()=>{recognition=null;toast('Voice input stopped. You can continue by typing.');const b=document.getElementById('voice-button');if(b)b.textContent='◉ Use voice';};
+      recognition.onend=()=>{recognition=null;const b=document.getElementById('voice-button');if(b)b.textContent='◉ Use voice';};
+      recognition.start();
+    }
+    async function signOut(){
+      if(!supabaseClient)return;
+      try{await flushCloudSave();}catch(error){console.error('Final Supabase sync failed before sign-out.',error);toast('Signing out; your latest edits remain saved on this device.');}
+      const {error}=await supabaseClient.auth.signOut();
+      if(error){console.error('Supabase sign-out failed.',error);toast(`Could not sign out: ${error.message}`);return;}
+      authNotice='You are signed out. Your local demo workspace is still available.';authNoticeType='info';toast('Signed out securely.');
+    }
+    async function flushCloudSave(){
+      clearTimeout(cloudSaveTimer);
+      if(!currentUser||!supabaseClient)return;
+      const {error}=await supabaseClient.from('user_workspaces').upsert({user_id:currentUser.id,workspace:state,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+      if(error)throw error;
+    }
+    async function disconnectProject(){
+      if(currentUser&&supabaseClient){try{await flushCloudSave();}catch(error){console.error('Final Supabase sync failed before disconnect.',error);}const {error}=await supabaseClient.auth.signOut();if(error){console.error('Could not sign out before disconnecting Supabase.',error);toast(`Could not disconnect: ${error.message}`);return;}}
+      try{localStorage.removeItem(SUPABASE_CONFIG_KEY);supabaseConfig=null;supabaseClient=null;authSubscription?.unsubscribe();authSubscription=null;currentUser=null;lastCloudUserId=null;authNotice='Supabase is disconnected. Your local workspace remains on this device.';authNoticeType='info';setSyncStatus('Saved on this device','local');render();}
+      catch(error){console.error('Could not remove Supabase configuration.',error);toast('Could not remove the saved project configuration.');}
+    }
+    async function sendPasswordReset(){
+      const email=document.getElementById('auth-email')?.value.trim();
+      if(!email){authNotice='Enter your email address first, then choose Forgot password.';authNoticeType='error';render();return;}
+      if(!supabaseClient)return;
+      try{const options=authRedirectUrl()?{redirectTo:authRedirectUrl()}:{};const {error}=await supabaseClient.auth.resetPasswordForEmail(email,options);if(error)throw error;authNotice='If an account exists for that email, a password-reset link is on its way.';authNoticeType='info';render();}
+      catch(error){authNotice=authErrorMessage(error);authNoticeType='error';render();}
+    }
+    async function startGoogleAuth(){
+      if(!supabaseClient){toast('Connect a Supabase project first.');return;}
+      try{const options=authRedirectUrl()?{redirectTo:authRedirectUrl()}:{};const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options});if(error)throw error;}
+      catch(error){authNotice=authErrorMessage(error);authNoticeType='error';render();}
+    }
+    render();
+    void checkApi();
+    void initializeSupabase();
+  </script>
+</body>
+</html>
