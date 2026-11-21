@@ -18,7 +18,7 @@ Open [http://127.0.0.1:8000](http://127.0.0.1:8000). The API documentation is at
 
 ## Publish the interactive demo on GitHub Pages
 
-The included GitHub Actions workflow deploys `index.html` as a static demo on pushes to `main`. In the repository settings, enable **Pages → Build and deployment → GitHub Actions**. After the first successful workflow, the site is available at [https://riddhi-cloud23.github.io/pivotpilotai/](https://riddhi-cloud23.github.io/pivotpilotai/).
+The included GitHub Actions workflow deploys `index.html` as a static demo on pushes to `main`. In the repository settings, enable **Pages → Build and deployment → GitHub Actions**, then push a commit to trigger deployment. The site is available at [https://riddhi-cloud23.github.io/pivotpilotai/](https://riddhi-cloud23.github.io/pivotpilotai/).
 
 GitHub Pages does not run FastAPI. Resume PDF/DOCX parsing, Gemini-assisted output, and server-side analysis need a separately hosted API; configure `window.PIVOTPILOT_API_URL` with that API's URL and allow the Pages origin in `FRONTEND_ORIGINS`. The frontend-only demo remains usable with local fallbacks. For Supabase sign-in, add the Pages site URL to Supabase's allowed redirect URLs.
 
